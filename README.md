@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/krateo-loves-neutron.png" alt="Krateo loves OpenStack Neutron" width="900"/>
+</p>
+
 # openstack-neutron-operator-kog
 
 Krateo Operator Generator (KOG) packaging that turns **OpenStack Neutron (networking v2.0)**
