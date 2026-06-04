@@ -1,0 +1,42 @@
+{{- if .Values.restdefinitions.port.enabled }}
+apiVersion: ogen.krateo.io/v1alpha1
+kind: RestDefinition
+metadata:
+  name: {{ .Release.Name }}-port
+  labels:
+    {{- include "openstack-neutron-operator-kog.labels" . | nindent 4 }}
+spec:
+  oasPath: configmap://{{ .Release.Namespace }}/{{ .Release.Name }}-port/port.yaml
+  resourceGroup: {{ .Values.restdefinitions.port.resourceGroup }}
+  resource:
+    # Neutron wraps the payload in a `port` envelope -> identifiers/status under .port.*
+    kind: {{ .Values.restdefinitions.port.resourceKind }}
+    identifiers:
+      - port.id
+      - port.name
+    additionalStatusFields:
+      - port.id
+      - port.status
+    verbsDescription:
+      - action: create
+        method: POST
+        path: /v2.0/ports
+      - action: get
+        method: GET
+        path: /v2.0/ports/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.port.id
+      - action: update
+        method: PUT
+        path: /v2.0/ports/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.port.id
+      - action: delete
+        method: DELETE
+        path: /v2.0/ports/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.port.id
+{{- end }}

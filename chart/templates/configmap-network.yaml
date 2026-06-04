@@ -1,0 +1,11 @@
+{{- if .Values.restdefinitions.network.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-network
+  labels:
+    {{- include "openstack-neutron-operator-kog.labels" . | nindent 4 }}
+data:
+  network.yaml: |
+{{ tpl (.Files.Get "assets/network.yaml") . | indent 4 }}
+{{- end }}

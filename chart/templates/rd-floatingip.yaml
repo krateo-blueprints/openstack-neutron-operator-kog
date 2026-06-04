@@ -1,0 +1,41 @@
+{{- if .Values.restdefinitions.floatingip.enabled }}
+apiVersion: ogen.krateo.io/v1alpha1
+kind: RestDefinition
+metadata:
+  name: {{ .Release.Name }}-floatingip
+  labels:
+    {{- include "openstack-neutron-operator-kog.labels" . | nindent 4 }}
+spec:
+  oasPath: configmap://{{ .Release.Namespace }}/{{ .Release.Name }}-floatingip/floatingip.yaml
+  resourceGroup: {{ .Values.restdefinitions.floatingip.resourceGroup }}
+  resource:
+    # Neutron wraps the payload in a `floatingip` envelope -> identifiers/status under .floatingip.*
+    kind: {{ .Values.restdefinitions.floatingip.resourceKind }}
+    identifiers:
+      - floatingip.id
+    additionalStatusFields:
+      - floatingip.id
+      - floatingip.status
+    verbsDescription:
+      - action: create
+        method: POST
+        path: /v2.0/floatingips
+      - action: get
+        method: GET
+        path: /v2.0/floatingips/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.floatingip.id
+      - action: update
+        method: PUT
+        path: /v2.0/floatingips/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.floatingip.id
+      - action: delete
+        method: DELETE
+        path: /v2.0/floatingips/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.floatingip.id
+{{- end }}

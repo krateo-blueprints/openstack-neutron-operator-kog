@@ -1,0 +1,119 @@
+openapi: 3.0.3
+info:
+  title: OpenStack Networking (Neutron) v2.0 - Security Groups (KOG-friendly subset)
+  description: |
+    Hand-crafted OpenAPI 3.0 subset of the Neutron v2.0 API covering the security group
+    lifecycle. Neutron wraps the payload in a `security_group` envelope, so the CR uses
+    `spec.security_group.*`; the CRD Kind is `NeutronSecurityGroup` to avoid colliding with that envelope
+    property in crdgen. Updates use PUT with a partial body (Neutron convention).
+  version: "2.0"
+servers:
+  - url: {{ include "openstack-neutron-operator-kog.authBridgeUrl" . }}
+    description: In-cluster Keystone-auth proxy in front of Neutron
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+  schemas:
+    SecurityGroupSpec:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    SecurityGroupCreateRequest:
+      type: object
+      required:
+        - security_group
+      properties:
+        security_group:
+          $ref: '#/components/schemas/SecurityGroupSpec'
+    SecurityGroupSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+    SecurityGroupEnvelope:
+      type: object
+      properties:
+        security_group:
+          $ref: '#/components/schemas/SecurityGroupSummary'
+security:
+  - bearer: []
+paths:
+  /v2.0/security-groups:
+    post:
+      operationId: createSecurityGroup
+      summary: Create a security group
+      tags: [v2.0/security-groups]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecurityGroupCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityGroupEnvelope'
+  /v2.0/security-groups/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getSecurityGroup
+      summary: Show security group details
+      tags: [v2.0/security-groups]
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityGroupEnvelope'
+    put:
+      operationId: updateSecurityGroup
+      summary: Update a security group
+      tags: [v2.0/security-groups]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecurityGroupCreateRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityGroupEnvelope'
+    delete:
+      operationId: deleteSecurityGroup
+      summary: Delete a security group
+      tags: [v2.0/security-groups]
+      security:
+        - bearer: []
+      responses:
+        '204':
+          description: Deleted

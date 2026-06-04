@@ -1,0 +1,11 @@
+{{- if .Values.restdefinitions.router.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-router
+  labels:
+    {{- include "openstack-neutron-operator-kog.labels" . | nindent 4 }}
+data:
+  router.yaml: |
+{{ tpl (.Files.Get "assets/router.yaml") . | indent 4 }}
+{{- end }}

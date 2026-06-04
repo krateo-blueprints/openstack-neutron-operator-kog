@@ -1,0 +1,42 @@
+{{- if .Values.restdefinitions.security_group.enabled }}
+apiVersion: ogen.krateo.io/v1alpha1
+kind: RestDefinition
+metadata:
+  name: {{ .Release.Name }}-security-group
+  labels:
+    {{- include "openstack-neutron-operator-kog.labels" . | nindent 4 }}
+spec:
+  oasPath: configmap://{{ .Release.Namespace }}/{{ .Release.Name }}-security-group/securitygroup.yaml
+  resourceGroup: {{ .Values.restdefinitions.security_group.resourceGroup }}
+  resource:
+    # Neutron wraps the payload in a `security_group` envelope -> identifiers/status under .security_group.*
+    kind: {{ .Values.restdefinitions.security_group.resourceKind }}
+    identifiers:
+      - security_group.id
+      - security_group.name
+    additionalStatusFields:
+      - security_group.id
+      - security_group.status
+    verbsDescription:
+      - action: create
+        method: POST
+        path: /v2.0/security-groups
+      - action: get
+        method: GET
+        path: /v2.0/security-groups/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.security_group.id
+      - action: update
+        method: PUT
+        path: /v2.0/security-groups/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.security_group.id
+      - action: delete
+        method: DELETE
+        path: /v2.0/security-groups/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.security_group.id
+{{- end }}

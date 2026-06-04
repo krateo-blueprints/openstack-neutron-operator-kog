@@ -1,0 +1,35 @@
+{{- if .Values.restdefinitions.security_group_rule.enabled }}
+apiVersion: ogen.krateo.io/v1alpha1
+kind: RestDefinition
+metadata:
+  name: {{ .Release.Name }}-security-group-rule
+  labels:
+    {{- include "openstack-neutron-operator-kog.labels" . | nindent 4 }}
+spec:
+  oasPath: configmap://{{ .Release.Namespace }}/{{ .Release.Name }}-security-group-rule/securitygrouprule.yaml
+  resourceGroup: {{ .Values.restdefinitions.security_group_rule.resourceGroup }}
+  resource:
+    # Neutron wraps the payload in a `security_group_rule` envelope -> identifiers/status under .security_group_rule.*
+    kind: {{ .Values.restdefinitions.security_group_rule.resourceKind }}
+    identifiers:
+      - security_group_rule.id
+    additionalStatusFields:
+      - security_group_rule.id
+      - security_group_rule.status
+    verbsDescription:
+      - action: create
+        method: POST
+        path: /v2.0/security-group-rules
+      - action: get
+        method: GET
+        path: /v2.0/security-group-rules/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.security_group_rule.id
+      - action: delete
+        method: DELETE
+        path: /v2.0/security-group-rules/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.security_group_rule.id
+{{- end }}

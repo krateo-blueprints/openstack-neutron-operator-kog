@@ -1,0 +1,77 @@
+# Default values for openstack-neutron-operator-kog.
+
+# Toggle the per-resource RestDefinitions emitted by this chart. Each Neutron
+# payload is envelope-wrapped (network/subnet/router/port/security_group/
+# security_group_rule/floatingip), so each Kind is prefixed `Neutron*` to avoid
+# the crdgen Kind-vs-property collision (the same reason Nova's Server -> Instance).
+restdefinitions:
+  network:
+    enabled: true
+    resourceGroup: network.openstack.krateo.io
+    resourceKind: NeutronNetwork
+  subnet:
+    enabled: true
+    resourceGroup: network.openstack.krateo.io
+    resourceKind: NeutronSubnet
+  router:
+    enabled: true
+    resourceGroup: network.openstack.krateo.io
+    resourceKind: NeutronRouter
+  port:
+    enabled: true
+    resourceGroup: network.openstack.krateo.io
+    resourceKind: NeutronPort
+  security_group:
+    enabled: true
+    resourceGroup: network.openstack.krateo.io
+    resourceKind: NeutronSecurityGroup
+  security_group_rule:
+    enabled: true
+    resourceGroup: network.openstack.krateo.io
+    resourceKind: NeutronSecurityGroupRule
+  floatingip:
+    enabled: true
+    resourceGroup: network.openstack.krateo.io
+    resourceKind: NeutronFloatingIP
+
+# auth-bridge: a stateless Keystone-auth reverse proxy (openstacksdk). It
+# auto-refreshes the token and works in-cluster (no public-DNS resolver trap).
+# The generated controller's plain-HTTP calls go here; the proxy injects a fresh
+# X-Auth-Token and forwards to the discovered `network` endpoint.
+#
+# Supply a clouds.yaml (admin creds) in a Secret named by cloudsSecret:
+#   kubectl create secret generic neutron-clouds --from-file=clouds.yaml=clouds.yaml
+authBridge:
+  enabled: true
+  replicaCount: 1
+  cloudsSecret: neutron-clouds
+  osCloud: openstack
+  serviceType: network
+  osInterface: internal
+  # Override the discovered endpoint (optional, e.g. http://neutron-server.openstack.svc.cluster.local:9696).
+  upstreamEndpoint: ""
+  image:
+    repository: quay.io/airshipit/openstack-client
+    tag: "2026.1-ubuntu_noble"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+serviceAccount:
+  create: false
+  name: ""
+
+nameOverride: ""
+fullnameOverride: ""

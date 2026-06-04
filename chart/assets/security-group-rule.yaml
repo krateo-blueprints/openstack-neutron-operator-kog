@@ -1,0 +1,118 @@
+openapi: 3.0.3
+info:
+  title: OpenStack Networking (Neutron) v2.0 - Security Group Rules (KOG-friendly subset)
+  description: |
+    Hand-crafted OpenAPI 3.0 subset of the Neutron v2.0 API covering the security group rule
+    lifecycle. Neutron wraps the payload in a `security_group_rule` envelope, so the CR uses
+    `spec.security_group_rule.*`; the CRD Kind is `NeutronSecurityGroupRule` to avoid colliding with that envelope
+    property in crdgen. Updates use PUT with a partial body (Neutron convention).
+  version: "2.0"
+servers:
+  - url: {{ include "openstack-neutron-operator-kog.authBridgeUrl" . }}
+    description: In-cluster Keystone-auth proxy in front of Neutron
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+  schemas:
+    SecurityGroupRuleSpec:
+      type: object
+      required:
+        - security_group_id
+        - direction
+      properties:
+        security_group_id:
+          type: string
+        direction:
+          type: string
+          description: "ingress or egress."
+        ethertype:
+          type: string
+          description: "IPv4 or IPv6."
+        protocol:
+          type: string
+          description: "tcp/udp/icmp."
+        port_range_min:
+          type: integer
+        port_range_max:
+          type: integer
+        remote_ip_prefix:
+          type: string
+        remote_group_id:
+          type: string
+    SecurityGroupRuleCreateRequest:
+      type: object
+      required:
+        - security_group_rule
+      properties:
+        security_group_rule:
+          $ref: '#/components/schemas/SecurityGroupRuleSpec'
+    SecurityGroupRuleSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        security_group_id:
+          type: string
+        direction:
+          type: string
+        protocol:
+          type: string
+    SecurityGroupRuleEnvelope:
+      type: object
+      properties:
+        security_group_rule:
+          $ref: '#/components/schemas/SecurityGroupRuleSummary'
+security:
+  - bearer: []
+paths:
+  /v2.0/security-group-rules:
+    post:
+      operationId: createSecurityGroupRule
+      summary: Create a security group rule
+      tags: [v2.0/security-group-rules]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecurityGroupRuleCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityGroupRuleEnvelope'
+  /v2.0/security-group-rules/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getSecurityGroupRule
+      summary: Show security group rule details
+      tags: [v2.0/security-group-rules]
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityGroupRuleEnvelope'
+    delete:
+      operationId: deleteSecurityGroupRule
+      summary: Delete a security group rule
+      tags: [v2.0/security-group-rules]
+      security:
+        - bearer: []
+      responses:
+        '204':
+          description: Deleted

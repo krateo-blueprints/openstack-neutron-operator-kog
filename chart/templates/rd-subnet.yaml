@@ -1,0 +1,42 @@
+{{- if .Values.restdefinitions.subnet.enabled }}
+apiVersion: ogen.krateo.io/v1alpha1
+kind: RestDefinition
+metadata:
+  name: {{ .Release.Name }}-subnet
+  labels:
+    {{- include "openstack-neutron-operator-kog.labels" . | nindent 4 }}
+spec:
+  oasPath: configmap://{{ .Release.Namespace }}/{{ .Release.Name }}-subnet/subnet.yaml
+  resourceGroup: {{ .Values.restdefinitions.subnet.resourceGroup }}
+  resource:
+    # Neutron wraps the payload in a `subnet` envelope -> identifiers/status under .subnet.*
+    kind: {{ .Values.restdefinitions.subnet.resourceKind }}
+    identifiers:
+      - subnet.id
+      - subnet.name
+    additionalStatusFields:
+      - subnet.id
+      - subnet.status
+    verbsDescription:
+      - action: create
+        method: POST
+        path: /v2.0/subnets
+      - action: get
+        method: GET
+        path: /v2.0/subnets/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.subnet.id
+      - action: update
+        method: PUT
+        path: /v2.0/subnets/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.subnet.id
+      - action: delete
+        method: DELETE
+        path: /v2.0/subnets/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.subnet.id
+{{- end }}
