@@ -2,6 +2,9 @@
   <img src="docs/krateo-loves-neutron.png" alt="Krateo loves OpenStack Neutron" width="900"/>
 </p>
 
+> 📖 **[Quickstart](docs/quickstart.md)** — install the operator and see a resource appear in Horizon.
+
+
 # openstack-neutron-operator-kog
 
 Krateo Operator Generator (KOG) packaging that turns **OpenStack Neutron (networking v2.0)**
