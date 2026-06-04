@@ -1,0 +1,125 @@
+openapi: 3.0.3
+info:
+  title: OpenStack Networking (Neutron) v2.0 - Routers (KOG-friendly subset)
+  description: |
+    Hand-crafted OpenAPI 3.0 subset of the Neutron v2.0 API covering the router
+    lifecycle. Neutron wraps the payload in a `router` envelope, so the CR uses
+    `spec.router.*`; the CRD Kind is `NeutronRouter` to avoid colliding with that envelope
+    property in crdgen. Updates use PUT with a partial body (Neutron convention).
+  version: "2.0"
+servers:
+  - url: {{ include "openstack-neutron-operator-kog.authBridgeUrl" . }}
+    description: In-cluster Keystone-auth proxy in front of Neutron
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+  schemas:
+    RouterSpec:
+      type: object
+      properties:
+        name:
+          type: string
+        admin_state_up:
+          type: boolean
+        description:
+          type: string
+        external_gateway_info:
+          type: object
+          description: "{network_id, enable_snat, external_fixed_ips}."
+          additionalProperties: true
+    RouterCreateRequest:
+      type: object
+      required:
+        - router
+      properties:
+        router:
+          $ref: '#/components/schemas/RouterSpec'
+    RouterSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+        admin_state_up:
+          type: boolean
+    RouterEnvelope:
+      type: object
+      properties:
+        router:
+          $ref: '#/components/schemas/RouterSummary'
+security:
+  - bearer: []
+paths:
+  /v2.0/routers:
+    post:
+      operationId: createRouter
+      summary: Create a router
+      tags: [v2.0/routers]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouterCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouterEnvelope'
+  /v2.0/routers/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getRouter
+      summary: Show router details
+      tags: [v2.0/routers]
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouterEnvelope'
+    put:
+      operationId: updateRouter
+      summary: Update a router
+      tags: [v2.0/routers]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouterCreateRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouterEnvelope'
+    delete:
+      operationId: deleteRouter
+      summary: Delete a router
+      tags: [v2.0/routers]
+      security:
+        - bearer: []
+      responses:
+        '204':
+          description: Deleted

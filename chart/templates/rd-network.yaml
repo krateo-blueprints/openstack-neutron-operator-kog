@@ -1,0 +1,42 @@
+{{- if .Values.restdefinitions.network.enabled }}
+apiVersion: ogen.krateo.io/v1alpha1
+kind: RestDefinition
+metadata:
+  name: {{ .Release.Name }}-network
+  labels:
+    {{- include "openstack-neutron-operator-kog.labels" . | nindent 4 }}
+spec:
+  oasPath: configmap://{{ .Release.Namespace }}/{{ .Release.Name }}-network/network.yaml
+  resourceGroup: {{ .Values.restdefinitions.network.resourceGroup }}
+  resource:
+    # Neutron wraps the payload in a `network` envelope -> identifiers/status under .network.*
+    kind: {{ .Values.restdefinitions.network.resourceKind }}
+    identifiers:
+      - network.id
+      - network.name
+    additionalStatusFields:
+      - network.id
+      - network.status
+    verbsDescription:
+      - action: create
+        method: POST
+        path: /v2.0/networks
+      - action: get
+        method: GET
+        path: /v2.0/networks/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.network.id
+      - action: update
+        method: PUT
+        path: /v2.0/networks/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.network.id
+      - action: delete
+        method: DELETE
+        path: /v2.0/networks/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.network.id
+{{- end }}

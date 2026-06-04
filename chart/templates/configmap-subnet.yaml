@@ -1,0 +1,11 @@
+{{- if .Values.restdefinitions.subnet.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-subnet
+  labels:
+    {{- include "openstack-neutron-operator-kog.labels" . | nindent 4 }}
+data:
+  subnet.yaml: |
+{{ tpl (.Files.Get "assets/subnet.yaml") . | indent 4 }}
+{{- end }}

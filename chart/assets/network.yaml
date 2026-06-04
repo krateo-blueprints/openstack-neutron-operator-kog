@@ -1,0 +1,130 @@
+openapi: 3.0.3
+info:
+  title: OpenStack Networking (Neutron) v2.0 - Networks (KOG-friendly subset)
+  description: |
+    Hand-crafted OpenAPI 3.0 subset of the Neutron v2.0 API covering the network
+    lifecycle. Neutron wraps the payload in a `network` envelope, so the CR uses
+    `spec.network.*`; the CRD Kind is `NeutronNetwork` to avoid colliding with that envelope
+    property in crdgen. Updates use PUT with a partial body (Neutron convention).
+  version: "2.0"
+servers:
+  - url: {{ include "openstack-neutron-operator-kog.authBridgeUrl" . }}
+    description: In-cluster Keystone-auth proxy in front of Neutron
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+  schemas:
+    NetworkSpec:
+      type: object
+      properties:
+        name:
+          type: string
+        admin_state_up:
+          type: boolean
+        shared:
+          type: boolean
+        router:external:
+          type: boolean
+          description: "Mark as an external network."
+        description:
+          type: string
+        port_security_enabled:
+          type: boolean
+    NetworkCreateRequest:
+      type: object
+      required:
+        - network
+      properties:
+        network:
+          $ref: '#/components/schemas/NetworkSpec'
+    NetworkSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+        admin_state_up:
+          type: boolean
+        shared:
+          type: boolean
+    NetworkEnvelope:
+      type: object
+      properties:
+        network:
+          $ref: '#/components/schemas/NetworkSummary'
+security:
+  - bearer: []
+paths:
+  /v2.0/networks:
+    post:
+      operationId: createNetwork
+      summary: Create a network
+      tags: [v2.0/networks]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NetworkCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkEnvelope'
+  /v2.0/networks/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getNetwork
+      summary: Show network details
+      tags: [v2.0/networks]
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkEnvelope'
+    put:
+      operationId: updateNetwork
+      summary: Update a network
+      tags: [v2.0/networks]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NetworkCreateRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NetworkEnvelope'
+    delete:
+      operationId: deleteNetwork
+      summary: Delete a network
+      tags: [v2.0/networks]
+      security:
+        - bearer: []
+      responses:
+        '204':
+          description: Deleted

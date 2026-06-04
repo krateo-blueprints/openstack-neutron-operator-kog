@@ -1,0 +1,11 @@
+{{- if .Values.restdefinitions.security_group.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-security-group
+  labels:
+    {{- include "openstack-neutron-operator-kog.labels" . | nindent 4 }}
+data:
+  securitygroup.yaml: |
+{{ tpl (.Files.Get "assets/security-group.yaml") . | indent 4 }}
+{{- end }}

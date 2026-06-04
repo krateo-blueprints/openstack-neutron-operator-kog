@@ -1,0 +1,126 @@
+openapi: 3.0.3
+info:
+  title: OpenStack Networking (Neutron) v2.0 - Floating IPs (KOG-friendly subset)
+  description: |
+    Hand-crafted OpenAPI 3.0 subset of the Neutron v2.0 API covering the floating IP
+    lifecycle. Neutron wraps the payload in a `floatingip` envelope, so the CR uses
+    `spec.floatingip.*`; the CRD Kind is `NeutronFloatingIP` to avoid colliding with that envelope
+    property in crdgen. Updates use PUT with a partial body (Neutron convention).
+  version: "2.0"
+servers:
+  - url: {{ include "openstack-neutron-operator-kog.authBridgeUrl" . }}
+    description: In-cluster Keystone-auth proxy in front of Neutron
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+  schemas:
+    FloatingIpSpec:
+      type: object
+      required:
+        - floating_network_id
+      properties:
+        floating_network_id:
+          type: string
+          description: "External network ID to allocate from."
+        port_id:
+          type: string
+        fixed_ip_address:
+          type: string
+        description:
+          type: string
+    FloatingIpCreateRequest:
+      type: object
+      required:
+        - floatingip
+      properties:
+        floatingip:
+          $ref: '#/components/schemas/FloatingIpSpec'
+    FloatingIpSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        floating_ip_address:
+          type: string
+        status:
+          type: string
+        port_id:
+          type: string
+    FloatingIpEnvelope:
+      type: object
+      properties:
+        floatingip:
+          $ref: '#/components/schemas/FloatingIpSummary'
+security:
+  - bearer: []
+paths:
+  /v2.0/floatingips:
+    post:
+      operationId: createFloatingIp
+      summary: Create a floating IP
+      tags: [v2.0/floatingips]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FloatingIpCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FloatingIpEnvelope'
+  /v2.0/floatingips/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getFloatingIp
+      summary: Show floating IP details
+      tags: [v2.0/floatingips]
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FloatingIpEnvelope'
+    put:
+      operationId: updateFloatingIp
+      summary: Update a floating IP
+      tags: [v2.0/floatingips]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FloatingIpCreateRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FloatingIpEnvelope'
+    delete:
+      operationId: deleteFloatingIp
+      summary: Delete a floating IP
+      tags: [v2.0/floatingips]
+      security:
+        - bearer: []
+      responses:
+        '204':
+          description: Deleted

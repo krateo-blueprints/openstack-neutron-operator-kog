@@ -1,0 +1,146 @@
+openapi: 3.0.3
+info:
+  title: OpenStack Networking (Neutron) v2.0 - Ports (KOG-friendly subset)
+  description: |
+    Hand-crafted OpenAPI 3.0 subset of the Neutron v2.0 API covering the port
+    lifecycle. Neutron wraps the payload in a `port` envelope, so the CR uses
+    `spec.port.*`; the CRD Kind is `NeutronPort` to avoid colliding with that envelope
+    property in crdgen. Updates use PUT with a partial body (Neutron convention).
+  version: "2.0"
+servers:
+  - url: {{ include "openstack-neutron-operator-kog.authBridgeUrl" . }}
+    description: In-cluster Keystone-auth proxy in front of Neutron
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+  schemas:
+    PortSpec:
+      type: object
+      required:
+        - network_id
+      properties:
+        name:
+          type: string
+        network_id:
+          type: string
+        admin_state_up:
+          type: boolean
+        mac_address:
+          type: string
+        fixed_ips:
+          type: array
+          description: "[{subnet_id, ip_address}]."
+          items:
+            type: object
+            additionalProperties: true
+        security_groups:
+          type: array
+          items:
+            type: string
+        device_id:
+          type: string
+        device_owner:
+          type: string
+    PortCreateRequest:
+      type: object
+      required:
+        - port
+      properties:
+        port:
+          $ref: '#/components/schemas/PortSpec'
+    PortSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+        network_id:
+          type: string
+        mac_address:
+          type: string
+        fixed_ips:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    PortEnvelope:
+      type: object
+      properties:
+        port:
+          $ref: '#/components/schemas/PortSummary'
+security:
+  - bearer: []
+paths:
+  /v2.0/ports:
+    post:
+      operationId: createPort
+      summary: Create a port
+      tags: [v2.0/ports]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PortCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortEnvelope'
+  /v2.0/ports/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getPort
+      summary: Show port details
+      tags: [v2.0/ports]
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortEnvelope'
+    put:
+      operationId: updatePort
+      summary: Update a port
+      tags: [v2.0/ports]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PortCreateRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortEnvelope'
+    delete:
+      operationId: deletePort
+      summary: Delete a port
+      tags: [v2.0/ports]
+      security:
+        - bearer: []
+      responses:
+        '204':
+          description: Deleted

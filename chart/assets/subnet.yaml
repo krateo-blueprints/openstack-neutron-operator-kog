@@ -1,0 +1,143 @@
+openapi: 3.0.3
+info:
+  title: OpenStack Networking (Neutron) v2.0 - Subnets (KOG-friendly subset)
+  description: |
+    Hand-crafted OpenAPI 3.0 subset of the Neutron v2.0 API covering the subnet
+    lifecycle. Neutron wraps the payload in a `subnet` envelope, so the CR uses
+    `spec.subnet.*`; the CRD Kind is `NeutronSubnet` to avoid colliding with that envelope
+    property in crdgen. Updates use PUT with a partial body (Neutron convention).
+  version: "2.0"
+servers:
+  - url: {{ include "openstack-neutron-operator-kog.authBridgeUrl" . }}
+    description: In-cluster Keystone-auth proxy in front of Neutron
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+  schemas:
+    SubnetSpec:
+      type: object
+      required:
+        - network_id
+        - cidr
+      properties:
+        name:
+          type: string
+        network_id:
+          type: string
+          description: "Parent network ID."
+        cidr:
+          type: string
+        ip_version:
+          type: integer
+          description: "4 or 6."
+        gateway_ip:
+          type: string
+        enable_dhcp:
+          type: boolean
+        allocation_pools:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        dns_nameservers:
+          type: array
+          items:
+            type: string
+    SubnetCreateRequest:
+      type: object
+      required:
+        - subnet
+      properties:
+        subnet:
+          $ref: '#/components/schemas/SubnetSpec'
+    SubnetSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        cidr:
+          type: string
+        network_id:
+          type: string
+        gateway_ip:
+          type: string
+    SubnetEnvelope:
+      type: object
+      properties:
+        subnet:
+          $ref: '#/components/schemas/SubnetSummary'
+security:
+  - bearer: []
+paths:
+  /v2.0/subnets:
+    post:
+      operationId: createSubnet
+      summary: Create a subnet
+      tags: [v2.0/subnets]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubnetCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubnetEnvelope'
+  /v2.0/subnets/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getSubnet
+      summary: Show subnet details
+      tags: [v2.0/subnets]
+      security:
+        - bearer: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubnetEnvelope'
+    put:
+      operationId: updateSubnet
+      summary: Update a subnet
+      tags: [v2.0/subnets]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubnetCreateRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubnetEnvelope'
+    delete:
+      operationId: deleteSubnet
+      summary: Delete a subnet
+      tags: [v2.0/subnets]
+      security:
+        - bearer: []
+      responses:
+        '204':
+          description: Deleted

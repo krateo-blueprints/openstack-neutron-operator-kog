@@ -1,0 +1,23 @@
+apiVersion: v2
+name: openstack-neutron-operator-kog
+description: |
+  Krateo Operator Generator (KOG) packaging that turns OpenStack Neutron
+  networking resources (networks, subnets, routers, ports, security groups
+  and floating IPs) into native Kubernetes custom resources, driven by
+  oasgen-provider + rest-dynamic-controller.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - krateo
+  - kog
+  - oasgen-provider
+  - openstack
+  - neutron
+  - network
+  - operator
+home: https://github.com/braghettos/openstack-neutron-operator-kog
+sources:
+  - https://github.com/braghettos/openstack-neutron-operator-kog
+maintainers:
+  - name: braghettos

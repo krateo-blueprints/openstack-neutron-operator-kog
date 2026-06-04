@@ -1,0 +1,42 @@
+{{- if .Values.restdefinitions.router.enabled }}
+apiVersion: ogen.krateo.io/v1alpha1
+kind: RestDefinition
+metadata:
+  name: {{ .Release.Name }}-router
+  labels:
+    {{- include "openstack-neutron-operator-kog.labels" . | nindent 4 }}
+spec:
+  oasPath: configmap://{{ .Release.Namespace }}/{{ .Release.Name }}-router/router.yaml
+  resourceGroup: {{ .Values.restdefinitions.router.resourceGroup }}
+  resource:
+    # Neutron wraps the payload in a `router` envelope -> identifiers/status under .router.*
+    kind: {{ .Values.restdefinitions.router.resourceKind }}
+    identifiers:
+      - router.id
+      - router.name
+    additionalStatusFields:
+      - router.id
+      - router.status
+    verbsDescription:
+      - action: create
+        method: POST
+        path: /v2.0/routers
+      - action: get
+        method: GET
+        path: /v2.0/routers/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.router.id
+      - action: update
+        method: PUT
+        path: /v2.0/routers/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.router.id
+      - action: delete
+        method: DELETE
+        path: /v2.0/routers/{id}
+        requestFieldMapping:
+          - inPath: id
+            inCustomResource: status.router.id
+{{- end }}
