@@ -3,17 +3,14 @@
   "title": "openstack-neutron-operator-kog values",
   "description": "Values for the OpenStack Neutron KOG chart. It emits one Krateo RestDefinition per Neutron resource (network, subnet, router, port, security group, security-group rule, floating IP) and a stateless openstacksdk auth-bridge that injects a fresh X-Auth-Token in front of the discovered Neutron endpoint.",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
     "restdefinitions": {
       "type": "object",
       "description": "Per-resource RestDefinition toggles. Disable any resource you do not want generated.",
-      "additionalProperties": false,
       "properties": {
         "network": {
           "type": "object",
           "description": "Neutron networks (/v2.0/networks).",
-          "additionalProperties": false,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -36,7 +33,6 @@
         "subnet": {
           "type": "object",
           "description": "Neutron subnets (/v2.0/subnets).",
-          "additionalProperties": false,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -59,7 +55,6 @@
         "router": {
           "type": "object",
           "description": "Neutron routers (/v2.0/routers).",
-          "additionalProperties": false,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -82,7 +77,6 @@
         "port": {
           "type": "object",
           "description": "Neutron ports (/v2.0/ports).",
-          "additionalProperties": false,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -105,7 +99,6 @@
         "security_group": {
           "type": "object",
           "description": "Neutron security groups (/v2.0/security-groups).",
-          "additionalProperties": false,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -128,7 +121,6 @@
         "security_group_rule": {
           "type": "object",
           "description": "Neutron security-group rules (/v2.0/security-group-rules). Immutable: no update verb.",
-          "additionalProperties": false,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -151,7 +143,6 @@
         "floatingip": {
           "type": "object",
           "description": "Neutron floating IPs (/v2.0/floatingips).",
-          "additionalProperties": false,
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -176,7 +167,6 @@
     "authBridge": {
       "type": "object",
       "description": "Stateless openstacksdk reverse proxy. It authenticates with a clouds.yaml, discovers the Neutron endpoint from the Keystone catalog, and injects a fresh X-Auth-Token on every request the rest-dynamic-controller makes.",
-      "additionalProperties": false,
       "required": [
         "cloudsSecret"
       ],
@@ -226,7 +216,6 @@
         "image": {
           "type": "object",
           "description": "auth-bridge container image (must contain openstacksdk + python3).",
-          "additionalProperties": false,
           "properties": {
             "repository": {
               "type": "string",
@@ -253,7 +242,6 @@
         "service": {
           "type": "object",
           "description": "auth-bridge Service exposing the proxy in-cluster.",
-          "additionalProperties": false,
           "properties": {
             "type": {
               "type": "string",
@@ -350,7 +338,6 @@
     "serviceAccount": {
       "type": "object",
       "description": "ServiceAccount settings.",
-      "additionalProperties": false,
       "properties": {
         "create": {
           "type": "boolean",
