@@ -21,7 +21,7 @@ sources:
   - https://github.com/braghettos/openstack-neutron-operator-kog
 maintainers:
   - name: braghettos
-icon: https://raw.githubusercontent.com/krateoplatformops/krateo/main/docs/media/logo.svg
+icon: https://www.openstack.org/themes/openstack/images/project-mascots/Neutron/OpenStack_Project_Neutron_vertical.png
 annotations:
   krateo.io/category: network
   krateo.io/display-name: OpenStack Neutron KOG
