@@ -1,0 +1,365 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "openstack-neutron-operator-kog values",
+  "description": "Values for the OpenStack Neutron KOG chart. It emits one Krateo RestDefinition per Neutron resource (network, subnet, router, port, security group, security-group rule, floating IP) and a stateless openstacksdk auth-bridge that injects a fresh X-Auth-Token in front of the discovered Neutron endpoint.",
+  "type": "object",
+  "properties": {
+    "restdefinitions": {
+      "type": "object",
+      "description": "Per-resource RestDefinition toggles. Disable any resource you do not want generated.",
+      "properties": {
+        "network": {
+          "type": "object",
+          "description": "Neutron networks (/v2.0/networks).",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Generate the RestDefinition (and CRD) for Neutron networks.",
+              "default": true
+            },
+            "resourceGroup": {
+              "type": "string",
+              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v1alpha1).",
+              "default": "network.openstack.krateo.io"
+            },
+            "resourceKind": {
+              "type": "string",
+              "description": "Generated CRD Kind. Prefixed Neutron* to avoid the crdgen Kind-vs-envelope-property collision.",
+              "minLength": 1,
+              "default": "NeutronNetwork"
+            }
+          }
+        },
+        "subnet": {
+          "type": "object",
+          "description": "Neutron subnets (/v2.0/subnets).",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Generate the RestDefinition (and CRD) for Neutron subnets.",
+              "default": true
+            },
+            "resourceGroup": {
+              "type": "string",
+              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v1alpha1).",
+              "default": "network.openstack.krateo.io"
+            },
+            "resourceKind": {
+              "type": "string",
+              "description": "Generated CRD Kind. Prefixed Neutron* to avoid the crdgen Kind-vs-envelope-property collision.",
+              "minLength": 1,
+              "default": "NeutronSubnet"
+            }
+          }
+        },
+        "router": {
+          "type": "object",
+          "description": "Neutron routers (/v2.0/routers).",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Generate the RestDefinition (and CRD) for Neutron routers.",
+              "default": true
+            },
+            "resourceGroup": {
+              "type": "string",
+              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v1alpha1).",
+              "default": "network.openstack.krateo.io"
+            },
+            "resourceKind": {
+              "type": "string",
+              "description": "Generated CRD Kind. Prefixed Neutron* to avoid the crdgen Kind-vs-envelope-property collision.",
+              "minLength": 1,
+              "default": "NeutronRouter"
+            }
+          }
+        },
+        "port": {
+          "type": "object",
+          "description": "Neutron ports (/v2.0/ports).",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Generate the RestDefinition (and CRD) for Neutron ports.",
+              "default": true
+            },
+            "resourceGroup": {
+              "type": "string",
+              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v1alpha1).",
+              "default": "network.openstack.krateo.io"
+            },
+            "resourceKind": {
+              "type": "string",
+              "description": "Generated CRD Kind. Prefixed Neutron* to avoid the crdgen Kind-vs-envelope-property collision.",
+              "minLength": 1,
+              "default": "NeutronPort"
+            }
+          }
+        },
+        "security_group": {
+          "type": "object",
+          "description": "Neutron security groups (/v2.0/security-groups).",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Generate the RestDefinition (and CRD) for Neutron security groups.",
+              "default": true
+            },
+            "resourceGroup": {
+              "type": "string",
+              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v1alpha1).",
+              "default": "network.openstack.krateo.io"
+            },
+            "resourceKind": {
+              "type": "string",
+              "description": "Generated CRD Kind. Prefixed Neutron* to avoid the crdgen Kind-vs-envelope-property collision.",
+              "minLength": 1,
+              "default": "NeutronSecurityGroup"
+            }
+          }
+        },
+        "security_group_rule": {
+          "type": "object",
+          "description": "Neutron security-group rules (/v2.0/security-group-rules). Immutable: no update verb.",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Generate the RestDefinition (and CRD) for Neutron security-group rules.",
+              "default": true
+            },
+            "resourceGroup": {
+              "type": "string",
+              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v1alpha1).",
+              "default": "network.openstack.krateo.io"
+            },
+            "resourceKind": {
+              "type": "string",
+              "description": "Generated CRD Kind. Prefixed Neutron* to avoid the crdgen Kind-vs-envelope-property collision.",
+              "minLength": 1,
+              "default": "NeutronSecurityGroupRule"
+            }
+          }
+        },
+        "floatingip": {
+          "type": "object",
+          "description": "Neutron floating IPs (/v2.0/floatingips).",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Generate the RestDefinition (and CRD) for Neutron floating IPs.",
+              "default": true
+            },
+            "resourceGroup": {
+              "type": "string",
+              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v1alpha1).",
+              "default": "network.openstack.krateo.io"
+            },
+            "resourceKind": {
+              "type": "string",
+              "description": "Generated CRD Kind. Prefixed Neutron* to avoid the crdgen Kind-vs-envelope-property collision.",
+              "minLength": 1,
+              "default": "NeutronFloatingIP"
+            }
+          }
+        }
+      }
+    },
+    "authBridge": {
+      "type": "object",
+      "description": "Stateless openstacksdk reverse proxy. It authenticates with a clouds.yaml, discovers the Neutron endpoint from the Keystone catalog, and injects a fresh X-Auth-Token on every request the rest-dynamic-controller makes.",
+      "required": [
+        "cloudsSecret"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Deploy the auth-bridge proxy.",
+          "default": true
+        },
+        "replicaCount": {
+          "type": "integer",
+          "description": "Number of auth-bridge replicas.",
+          "minimum": 1,
+          "default": 1
+        },
+        "cloudsSecret": {
+          "type": "string",
+          "description": "Name of an existing Secret (same namespace) holding the admin clouds.yaml mounted at /etc/openstack/clouds.yaml. Create it with: kubectl create secret generic neutron-clouds --from-file=clouds.yaml=clouds.yaml. THE key install-time input.",
+          "minLength": 1,
+          "default": "neutron-clouds"
+        },
+        "osCloud": {
+          "type": "string",
+          "description": "OS_CLOUD: which cloud entry inside clouds.yaml to use.",
+          "default": "openstack"
+        },
+        "serviceType": {
+          "type": "string",
+          "description": "Keystone catalog service type to discover (Neutron = network).",
+          "default": "network"
+        },
+        "osInterface": {
+          "type": "string",
+          "description": "OS_INTERFACE: which catalog endpoint to use (public, internal, admin).",
+          "enum": [
+            "public",
+            "internal",
+            "admin"
+          ],
+          "default": "internal"
+        },
+        "upstreamEndpoint": {
+          "type": "string",
+          "description": "Optional explicit upstream Neutron endpoint, overriding catalog discovery (e.g. http://neutron-server.openstack.svc.cluster.local:9696). Leave empty to auto-discover from the Keystone catalog.",
+          "default": ""
+        },
+        "image": {
+          "type": "object",
+          "description": "auth-bridge container image (must contain openstacksdk + python3).",
+          "properties": {
+            "repository": {
+              "type": "string",
+              "description": "Image repository.",
+              "default": "quay.io/airshipit/openstack-client"
+            },
+            "tag": {
+              "type": "string",
+              "description": "Image tag.",
+              "default": "2026.1-ubuntu_noble"
+            },
+            "pullPolicy": {
+              "type": "string",
+              "description": "Image pull policy.",
+              "enum": [
+                "Always",
+                "IfNotPresent",
+                "Never"
+              ],
+              "default": "IfNotPresent"
+            }
+          }
+        },
+        "service": {
+          "type": "object",
+          "description": "auth-bridge Service exposing the proxy in-cluster.",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Kubernetes Service type.",
+              "enum": [
+                "ClusterIP",
+                "NodePort",
+                "LoadBalancer"
+              ],
+              "default": "ClusterIP"
+            },
+            "port": {
+              "type": "integer",
+              "description": "Service port.",
+              "minimum": 1,
+              "maximum": 65535,
+              "default": 8080
+            }
+          }
+        },
+        "resources": {
+          "type": "object",
+          "description": "auth-bridge container resource requests/limits (standard Kubernetes ResourceRequirements).",
+          "properties": {
+            "requests": {
+              "type": "object",
+              "description": "Resource requests.",
+              "properties": {
+                "cpu": {
+                  "type": "string",
+                  "description": "CPU request.",
+                  "default": "20m"
+                },
+                "memory": {
+                  "type": "string",
+                  "description": "Memory request.",
+                  "default": "64Mi"
+                }
+              }
+            },
+            "limits": {
+              "type": "object",
+              "description": "Resource limits.",
+              "properties": {
+                "cpu": {
+                  "type": "string",
+                  "description": "CPU limit.",
+                  "default": "500m"
+                },
+                "memory": {
+                  "type": "string",
+                  "description": "Memory limit.",
+                  "default": "256Mi"
+                }
+              }
+            }
+          },
+          "default": {
+            "requests": {
+              "cpu": "20m",
+              "memory": "64Mi"
+            },
+            "limits": {
+              "cpu": "500m",
+              "memory": "256Mi"
+            }
+          }
+        },
+        "podAnnotations": {
+          "type": "object",
+          "description": "Extra annotations for the auth-bridge pod.",
+          "default": {}
+        },
+        "nodeSelector": {
+          "type": "object",
+          "description": "Node selector for the auth-bridge pod.",
+          "default": {}
+        },
+        "tolerations": {
+          "type": "array",
+          "description": "Tolerations for the auth-bridge pod.",
+          "items": {
+            "type": "object"
+          },
+          "default": []
+        },
+        "affinity": {
+          "type": "object",
+          "description": "Affinity rules for the auth-bridge pod.",
+          "default": {}
+        }
+      }
+    },
+    "serviceAccount": {
+      "type": "object",
+      "description": "ServiceAccount settings.",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "description": "Create a ServiceAccount for the chart.",
+          "default": false
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the ServiceAccount to use; empty uses the default.",
+          "default": ""
+        }
+      }
+    },
+    "nameOverride": {
+      "type": "string",
+      "description": "Override the chart name portion of generated resource names.",
+      "default": ""
+    },
+    "fullnameOverride": {
+      "type": "string",
+      "description": "Override the full generated resource name.",
+      "default": ""
+    }
+  }
+}
