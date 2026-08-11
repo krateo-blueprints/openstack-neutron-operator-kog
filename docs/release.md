@@ -10,7 +10,7 @@ timestamp: 2026-08-11T00:00:00Z
 # Release
 
 The chart is published as an OCI artifact to GHCR by the `release-chart` workflow
-([`.github/workflows/release-chart.yaml`](../.github/workflows/release-chart.yaml)).
+([`.github/workflows/release-tag.yaml`](../.github/workflows/release-tag.yaml)).
 
 ## What ships
 
