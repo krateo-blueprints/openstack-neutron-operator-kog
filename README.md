@@ -106,7 +106,7 @@ deleting and recreating the CR.
 ## Develop & release
 
 The chart is published to `oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog` by
-the `release-chart` workflow ([`.github/workflows/release-chart.yaml`](.github/workflows/release-chart.yaml))
+the `release-chart` workflow ([`.github/workflows/release-tag.yaml`](.github/workflows/release-tag.yaml))
 on a SemVer git tag that matches `chart/Chart.yaml` `version` (no `v` prefix):
 
 ```bash
