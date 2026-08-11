@@ -1,0 +1,71 @@
+# Sample Neutron CRs.
+#
+# oasgen-provider generates a per-Kind <Kind>Configuration carrying the bearer
+# token. The auth-bridge proxy injects a fresh X-Auth-Token itself, so the bearer
+# token here is a placeholder - any non-empty Secret value works. Create one
+# Configuration per Kind you use.
+#
+# kubectl create secret generic neutron-token --from-literal=token=proxy-injects-real-token -n krateo-system
+---
+apiVersion: network.openstack.krateo.io/v1alpha1
+kind: NeutronNetworkConfiguration
+metadata:
+  name: neutron-config
+  namespace: krateo-system
+spec:
+  authentication:
+    bearer:
+      tokenRef: { name: neutron-token, namespace: krateo-system, key: token }
+---
+apiVersion: network.openstack.krateo.io/v1alpha1
+kind: NeutronNetwork
+metadata:
+  name: demo-net
+  namespace: krateo-system
+spec:
+  configurationRef: { name: neutron-config, namespace: krateo-system }
+  network:
+    name: demo-net
+    admin_state_up: true
+---
+apiVersion: network.openstack.krateo.io/v1alpha1
+kind: NeutronSubnet
+metadata:
+  name: demo-subnet
+  namespace: krateo-system
+spec:
+  # configurationRef -> a NeutronSubnetConfiguration (same token Secret).
+  configurationRef: { name: neutron-config-subnet, namespace: krateo-system }
+  subnet:
+    name: demo-subnet
+    network_id: "<demo-net id from NeutronNetwork status.network.id>"
+    cidr: "10.20.0.0/24"
+    ip_version: 4
+    enable_dhcp: true
+---
+apiVersion: network.openstack.krateo.io/v1alpha1
+kind: NeutronSecurityGroup
+metadata:
+  name: demo-sg
+  namespace: krateo-system
+spec:
+  configurationRef: { name: neutron-config-security-group, namespace: krateo-system }
+  security_group:
+    name: demo-sg
+    description: Created by neutron-kog
+---
+apiVersion: network.openstack.krateo.io/v1alpha1
+kind: NeutronSecurityGroupRule
+metadata:
+  name: demo-sg-ssh
+  namespace: krateo-system
+spec:
+  configurationRef: { name: neutron-config-security-group-rule, namespace: krateo-system }
+  security_group_rule:
+    security_group_id: "<demo-sg id>"
+    direction: ingress
+    ethertype: IPv4
+    protocol: tcp
+    port_range_min: 22
+    port_range_max: 22
+    remote_ip_prefix: "0.0.0.0/0"

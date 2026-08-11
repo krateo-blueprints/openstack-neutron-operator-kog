@@ -1,0 +1,28 @@
+# openstack-neutron-operator-kog — LLM doc index (pinned: 0.1.0)
+# One line per file; regenerate the pin on release. The chart version is
+# CompositionDefinition.spec.chart.version and equals Chart.yaml version/appVersion — one tag
+# covers the chart and these docs.
+docs/index.md: the map — what the blueprint is, the doc bundle, the repo layout, the resource table
+docs/overview.md: architecture — the KOG generation model, per-resource OpenAPI subsets, the envelope/Neutron* naming, the auth-bridge Keystone proxy
+docs/usage.md: install (chart or Composition), supply clouds.yaml, apply Neutron CRs, wire UUID references, verify
+docs/configuration.md: the whole values surface — per-resource restdefinitions toggles and the authBridge block
+docs/api.md: the CompositionDefinition CRD, the generated Composition CR, and the seven Neutron CRDs (Kinds, group, envelope spec/status, verbs)
+docs/examples.md: index of the runnable examples under examples/
+docs/release.md: how a release ships — a SemVer tag drives helm lint/package/push to GHCR
+docs/log.md: curated history
+docs/quickstart.md: end-to-end walkthrough — install, apply CRs, see them in Horizon (with screenshots)
+examples/neutron-operator/README.md: install the operator as a Composition then create sample Neutron resources
+examples/neutron-operator/composition.yaml: the operator Composition CR (auth-bridge + RestDefinitions; enables network/subnet, disables floatingip)
+examples/neutron-operator/network-resources.yaml: sample Neutron CRs plus the <Kind>Configuration carrying the token
+# Source (read at the same tag; the docs above are derived from these):
+README.md: the short version — resources, auth, quickstart, repo layout
+chart/Chart.yaml: chart metadata, version, Krateo annotations
+chart/values.yaml: every value with its rationale in comments
+chart/values.schema.json: the typed schema for the values above
+chart/templates/_helpers.tpl: name helpers incl. the in-cluster authBridgeUrl the controller hits
+chart/templates/rd-network.yaml: a per-resource RestDefinition — Kind, identifiers, status fields, verb-to-HTTP mapping
+chart/templates/auth-bridge-deployment.yaml: the auth-bridge Deployment (openstack-client image running the proxy)
+chart/scripts/openstack-auth-proxy.py: the openstacksdk Keystone-auth reverse proxy that injects a fresh X-Auth-Token
+chart/assets/network.yaml: a hand-crafted Neutron OAS subset (network), bundled into a ConfigMap
+chart/samples/network-resources.yaml: the bundled sample Neutron CRs
+compositiondefinition.yaml: this component's registration (spec.chart.version = the published chart)
