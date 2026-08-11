@@ -1,3 +1,12 @@
+---
+type: Runbook
+title: openstack-neutron-operator-kog — quickstart
+description: End-to-end walkthrough of the OpenStack Neutron KOG — install the operator, apply a NeutronNetwork, NeutronSubnet and NeutronSecurityGroup, and watch them appear in the Horizon dashboard.
+resource: oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog
+tags: [kog, openstack, neutron, quickstart, runbook]
+timestamp: 2026-08-11T00:00:00Z
+---
+
 # Quickstart — Neutron (network) operator
 
 Manage OpenStack **Neutron** networking as Kubernetes CRs. End to end: install the

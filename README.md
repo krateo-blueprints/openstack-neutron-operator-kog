@@ -2,21 +2,18 @@
   <img src="docs/krateo-loves-neutron.png" alt="Krateo loves OpenStack Neutron" width="900"/>
 </p>
 
-> 📖 **[Quickstart](docs/quickstart.md)** — install the operator and see a resource appear in Horizon.
-
-
 # openstack-neutron-operator-kog
 
-Krateo Operator Generator (KOG) packaging that turns **OpenStack Neutron (networking v2.0)**
+## What is this
+
+A Krateo Operator Generator (KOG) blueprint that turns **OpenStack Neutron (networking v2.0)**
 resources into native Kubernetes custom resources — no hand-written controller, just a curated
-OpenAPI subset per resource and a generic `rest-dynamic-controller`.
+OpenAPI subset per resource plus the generic
+[`rest-dynamic-controller`](https://github.com/krateo-platformops/rest-dynamic-controller), wired up by
+[`oasgen-provider`](https://github.com/krateo-platformops/oasgen-provider).
 
-`kubectl apply` a `NeutronNetwork` / `NeutronSubnet` / … CR &rarr; KOG's
-[`oasgen-provider`](https://github.com/krateoplatformops/oasgen-provider) +
-[`rest-dynamic-controller`](https://github.com/krateoplatformops/rest-dynamic-controller)
-reconcile it into a real Neutron object.
-
-## Resources
+`kubectl apply` a `NeutronNetwork` / `NeutronSubnet` / … CR and it is reconciled into a real Neutron
+object.
 
 | Kind | Neutron API | Verbs |
 |------|-------------|-------|
@@ -28,63 +25,97 @@ reconcile it into a real Neutron object.
 | `NeutronSecurityGroupRule` | `/v2.0/security-group-rules` | create / get / delete (immutable) |
 | `NeutronFloatingIP` | `/v2.0/floatingips` | create / get / update / delete |
 
-Each Neutron payload is envelope-wrapped (`{network:{…}}`, `{subnet:{…}}`, …), so every Kind is
-prefixed `Neutron*` to avoid the crdgen Kind-vs-property collision (the same reason Nova's `Server`
-→ `Instance`). Neutron updates are a `PUT` with a partial body (the Neutron convention), so CRUD
-resources carry an `update` verb; security-group rules are immutable (no update).
+Every payload is envelope-wrapped (`{network:{…}}`, `{subnet:{…}}`, …), so each Kind is prefixed
+`Neutron*` to avoid the crdgen Kind-vs-property collision. All Kinds share the API group
+`network.openstack.krateo.io`.
 
-## Auth: the openstacksdk proxy (auto-refreshing)
+**Auth:** the generated controller speaks plain HTTP and can't do Keystone token exchange. This chart
+ships a small **auth-bridge** ([`chart/scripts/openstack-auth-proxy.py`](chart/scripts/openstack-auth-proxy.py))
+that authenticates with a `clouds.yaml`, discovers the `network` endpoint, and injects a fresh
+`X-Auth-Token` on every call — in-cluster, no public-DNS resolver trap.
 
-KOG's controller speaks plain HTTP and can't do Keystone token exchange. This chart ships a small
-**auth-bridge** (`scripts/openstack-auth-proxy.py` in the openstack-client image): it authenticates
-with a `clouds.yaml`, discovers the `network` endpoint, and injects a **fresh** `X-Auth-Token` on
-every call. It never expires and works in-cluster (no public-DNS resolver trap). Supply the admin
-`clouds.yaml` in a Secret:
+## Install
 
-```bash
-kubectl create secret generic neutron-clouds --from-file=clouds.yaml=clouds.yaml -n krateo-system
-```
-
-## Quickstart
+Prerequisite — the Krateo KOG provider in the cluster:
 
 ```bash
 helm repo add krateo https://charts.krateo.io && helm repo update
 helm upgrade --install oasgen-provider krateo/oasgen-provider -n krateo-system --create-namespace
+```
 
-kubectl create secret generic neutron-clouds --from-file=clouds.yaml=clouds.yaml -n krateo-system
-helm upgrade --install neutron-kog ./chart -n krateo-system \
+Supply the admin `clouds.yaml` in a Secret, then install the operator:
+
+```bash
+kubectl -n krateo-system create secret generic neutron-clouds --from-file=clouds.yaml=clouds.yaml
+
+helm upgrade --install neutron-kog \
+  oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog \
+  -n krateo-system --create-namespace \
   --set authBridge.upstreamEndpoint=http://neutron-server.openstack.svc.cluster.local:9696
+```
 
+Or install it as a Krateo Composition:
+
+```bash
+kubectl apply -f compositiondefinition.yaml
+kubectl apply -f examples/neutron-operator/composition.yaml
+```
+
+## Configure
+
+All configuration is [`chart/values.yaml`](chart/values.yaml), typed by
+[`chart/values.schema.json`](chart/values.schema.json):
+
+- `restdefinitions.<resource>.enabled` — toggle each of the seven resources (network, subnet, router,
+  port, security_group, security_group_rule, floatingip).
+- `authBridge.*` — the Keystone-auth proxy: `cloudsSecret`, `osCloud`, `serviceType`, `osInterface`,
+  `upstreamEndpoint` (empty = auto-discover), `image`, `service`, `resources`.
+
+Full reference: [docs/configuration.md](docs/configuration.md).
+
+## Examples
+
+- [examples/neutron-operator](examples/neutron-operator/README.md) — install the operator as a
+  Composition, then create sample Neutron CRs (network, subnet, security group, rule).
+- Sample Neutron CRs are also bundled at
+  [chart/samples/network-resources.yaml](chart/samples/network-resources.yaml).
+
+```bash
 kubectl -n krateo-system apply -f chart/samples/network-resources.yaml
 kubectl -n krateo-system get neutronnetworks.network.openstack.krateo.io -w
 ```
 
-## What's in here
+Cross-resource references are by OpenStack UUID — read the id from the referenced CR's
+`status.<envelope>.id` and wire it into the dependent CR (e.g. `NeutronSubnet.spec.subnet.network_id`),
+or sequence them with a Composition. `NeutronSecurityGroupRule` is immutable — change a rule by
+deleting and recreating the CR.
 
+## Docs
+
+- [docs/index.md](docs/index.md) — the doc bundle map
+- [docs/overview.md](docs/overview.md) — architecture: the KOG model, the auth-bridge, the naming convention
+- [docs/usage.md](docs/usage.md) — install, supply creds, apply CRs, verify
+- [docs/configuration.md](docs/configuration.md) — the whole values surface
+- [docs/api.md](docs/api.md) — the CompositionDefinition and the generated Neutron CRDs
+- [docs/examples.md](docs/examples.md) — the runnable examples
+- [docs/release.md](docs/release.md) — how a release ships
+- [docs/log.md](docs/log.md) — curated history
+- [docs/quickstart.md](docs/quickstart.md) — end-to-end walkthrough with Horizon screenshots
+- [docs/llms.txt](docs/llms.txt) — one-line-per-file index for LLMs
+
+## Develop & release
+
+The chart is published to `oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog` by
+the `release-chart` workflow ([`.github/workflows/release-chart.yaml`](.github/workflows/release-chart.yaml))
+on a SemVer git tag that matches `chart/Chart.yaml` `version` (no `v` prefix):
+
+```bash
+git tag 0.1.0 && git push origin 0.1.0
 ```
-chart/
-  Chart.yaml
-  values.yaml                 # per-resource toggles + auth-bridge config
-  assets/                     # one Neutron OAS subset per resource
-    network.yaml subnet.yaml router.yaml port.yaml
-    security-group.yaml security-group-rule.yaml floatingip.yaml
-  scripts/
-    openstack-auth-proxy.py   # openstacksdk Keystone-auth reverse proxy
-  templates/
-    configmap-*.yaml          # bundle each OAS into a ConfigMap
-    rd-*.yaml                 # one RestDefinition per resource (toggle via values)
-    auth-bridge-*.yaml        # the auth proxy Deployment/Service/ConfigMap
-  samples/
-    network-resources.yaml    # example CRs (Configuration + Network/Subnet/SecurityGroup/…)
-```
 
-## Notes
-
-- Cross-resource references are by OpenStack UUID (e.g. `NeutronSubnet.spec.subnet.network_id`,
-  `NeutronPort.spec.port.network_id`). Read the created ID from the referenced CR's
-  `status.<envelope>.id` and wire it into the dependent CR — or use a Krateo Composition to
-  sequence them.
-- `NeutronSecurityGroupRule` is immutable; change a rule by deleting and recreating the CR.
+Documentation is linted on pull requests by the `lint-docs` job
+([`.github/workflows/lint.yaml`](.github/workflows/lint.yaml)). See [docs/release.md](docs/release.md)
+for the full runbook.
 
 ## License
 
