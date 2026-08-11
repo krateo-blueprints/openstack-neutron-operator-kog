@@ -16,9 +16,9 @@ keywords:
   - neutron
   - network
   - operator
-home: https://github.com/braghettos/openstack-neutron-operator-kog
+home: https://github.com/krateo-blueprints/openstack-neutron-operator-kog
 sources:
-  - https://github.com/braghettos/openstack-neutron-operator-kog
+  - https://github.com/krateo-blueprints/openstack-neutron-operator-kog
 maintainers:
   - name: braghettos
 icon: https://raw.githubusercontent.com/krateoplatformops/krateo/main/docs/media/logo.svg
