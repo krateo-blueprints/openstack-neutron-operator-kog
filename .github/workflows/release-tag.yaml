@@ -26,6 +26,12 @@ permissions:
 jobs:
   package-and-push:
     runs-on: ubuntu-latest
+    env:
+      # The blueprint chart: it has values.schema.json, and the repo-root
+      # compositiondefinition.yaml installs it (PUBLISHING.md rule 2). Job-level, because the
+      # packaging step copies the CompositionDefinition into it and the release-asset step must
+      # skip that same copy: one definition, so the two can't drift apart.
+      BLUEPRINT_DIR: ./chart
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -107,10 +113,6 @@ jobs:
             helm registry login ghcr.io --username "${{ github.actor }}" --password-stdin
 
       - name: Package and push every chart
-        env:
-          # The blueprint chart: it has values.schema.json, and the repo-root
-          # compositiondefinition.yaml installs it (PUBLISHING.md rule 2).
-          BLUEPRINT_DIR: ./chart
         run: |
           set -euo pipefail
           # Refuse here, before GHCR holds the version, every archive the Marketplace index's publisher
@@ -220,14 +222,14 @@ jobs:
           # Runs after the charts are pushed: the chart is the primary artifact and an asset
           # problem must never block it. Stage into a fresh dir so a root-level CD is never
           # cp'd onto itself (an error, not a no-op — a lesson from selfservice 0.2.26).
-          # ./chart/compositiondefinition.yaml is the packaging step's copy of the root file, not
-          # a second CompositionDefinition, so it is not attached again.
+          # ${BLUEPRINT_DIR}/compositiondefinition.yaml is the packaging step's copy of the root
+          # file, not a second CompositionDefinition, so it is not attached again.
           stage="$(mktemp -d)"; assets=()
           while IFS= read -r -d '' cd; do
             d="$(dirname "$cd")"
             if [ "$d" = "." ]; then out="compositiondefinition.yaml"; else out="compositiondefinition-$(basename "$d").yaml"; fi
             cp "$cd" "$stage/$out"; assets+=("$stage/$out")
-          done < <(find . -type f -name compositiondefinition.yaml -not -path './chart/*' \
+          done < <(find . -type f -name compositiondefinition.yaml -not -path "${BLUEPRINT_DIR}/compositiondefinition.yaml" \
                         -not -path '*/charts/*' -not -path '*/examples/*' -not -path '*/samples/*' -print0)
           [ ${#assets[@]} -eq 0 ] && { echo "no CompositionDefinition to publish"; exit 0; }
           gh release view "${VERSION}" >/dev/null 2>&1 \
