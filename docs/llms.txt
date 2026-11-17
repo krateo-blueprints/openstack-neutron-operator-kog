@@ -1,4 +1,4 @@
-# openstack-neutron-operator-kog — LLM doc index (pinned: 0.1.0)
+# openstack-neutron-operator-kog — LLM doc index (pinned: 0.1.2)
 # One line per file; regenerate the pin on release. The chart version is
 # CompositionDefinition.spec.chart.version and equals Chart.yaml version/appVersion — one tag
 # covers the chart and these docs.

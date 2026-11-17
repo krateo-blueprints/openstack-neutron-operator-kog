@@ -27,8 +27,11 @@ metadata:
 spec:
   chart:
     url: oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog
-    version: "0.1.0"
+    version: "0.1.2"
 ```
+
+In the repository `spec.chart.version` is the `CHART_VERSION` placeholder. The `release-tag` workflow
+stamps it from the git tag and attaches the stamped file to the GitHub release; apply that one.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -44,11 +47,11 @@ spec:
 Applying the CompositionDefinition makes Krateo generate a Composition CRD via `crdgen`:
 
 - **group** = `composition.krateo.io`
-- **version** = chart version `0.1.0` → `v0-1-0`
+- **version** = chart version `0.1.2` → `v0-1-2`
 - **Kind** = PascalCase of the definition name (hyphens removed):
   `openstack-neutron-operator-kog` → `OpenstackNeutronOperatorKog`
 
-So the Composition CR is `composition.krateo.io/v0-1-0`, Kind `OpenstackNeutronOperatorKog`. Its
+So the Composition CR is `composition.krateo.io/v0-1-2`, Kind `OpenstackNeutronOperatorKog`. Its
 `spec` mirrors the chart values (see [configuration.md](configuration.md)); see
 [`examples/neutron-operator/composition.yaml`](../examples/neutron-operator/composition.yaml) for a complete instance. Creating this CR
 installs the operator layer (auth-bridge + RestDefinitions); it does not create any Neutron object.

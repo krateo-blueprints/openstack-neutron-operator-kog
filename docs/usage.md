@@ -68,7 +68,8 @@ kubectl apply -f examples/composition.yaml
 ```
 
 The Composition CR's Kind is `OpenstackNeutronOperatorKog` (PascalCase of the CompositionDefinition
-name) and its apiVersion is `composition.krateo.io/v0-1-0` (derived from chart version `0.1.0`). See
+name) and its apiVersion is `composition.krateo.io/v0-1-2` (derived from chart version `0.1.2`; it changes
+with every release). See
 [examples.md](examples.md) and [api.md](api.md).
 
 ## 3. Create Neutron resources
