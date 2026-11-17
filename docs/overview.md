@@ -4,7 +4,7 @@ title: openstack-neutron-operator-kog — overview
 description: What the blueprint does and how it is built — the KOG generation model (oasgen-provider + rest-dynamic-controller), the per-resource OpenAPI subsets, the Neutron envelope/Kind naming convention, and the auth-bridge Keystone proxy.
 resource: oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog
 tags: [kog, openstack, neutron, oasgen-provider, rest-dynamic-controller, auth-bridge]
-timestamp: 2026-08-11T00:00:00Z
+timestamp: 2026-11-17T00:00:00Z
 ---
 
 # Overview
@@ -44,13 +44,14 @@ Neutron resource, KOG-friendly on purpose (only the fields the CR needs, envelop
 The chart bundles each subset into a ConfigMap ([`chart/templates/configmap-*.yaml`](../chart/templates))
 and references it from the matching `RestDefinition` via a `configmap://` `oasPath`.
 
-The seven resources and their Neutron API paths:
+The eight resources and their Neutron API paths:
 
 | Resource | Neutron API | CR Kind |
 |----------|-------------|---------|
 | network | `/v2.0/networks` | `NeutronNetwork` |
 | subnet | `/v2.0/subnets` | `NeutronSubnet` |
 | router | `/v2.0/routers` | `NeutronRouter` |
+| router interface | `/v2.0/routers/{router_id}/add_router_interface` · `remove_router_interface` (observed via `/v2.0/ports`) | `NeutronRouterInterface` |
 | port | `/v2.0/ports` | `NeutronPort` |
 | security group | `/v2.0/security-groups` | `NeutronSecurityGroup` |
 | security-group rule | `/v2.0/security-group-rules` | `NeutronSecurityGroupRule` |

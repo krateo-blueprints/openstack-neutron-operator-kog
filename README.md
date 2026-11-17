@@ -20,13 +20,15 @@ object.
 | `NeutronNetwork` | `/v2.0/networks` | create / get / update / delete |
 | `NeutronSubnet` | `/v2.0/subnets` | create / get / update / delete |
 | `NeutronRouter` | `/v2.0/routers` | create / get / update / delete |
+| `NeutronRouterInterface` | `/v2.0/routers/{router_id}/add_router_interface` · `remove_router_interface` | create / findby / delete (immutable) |
 | `NeutronPort` | `/v2.0/ports` | create / get / update / delete |
 | `NeutronSecurityGroup` | `/v2.0/security-groups` | create / get / update / delete |
 | `NeutronSecurityGroupRule` | `/v2.0/security-group-rules` | create / get / delete (immutable) |
 | `NeutronFloatingIP` | `/v2.0/floatingips` | create / get / update / delete |
 
-Every payload is envelope-wrapped (`{network:{…}}`, `{subnet:{…}}`, …), so each Kind is prefixed
-`Neutron*` to avoid the crdgen Kind-vs-property collision. All Kinds share the API group
+Every resource payload is envelope-wrapped (`{network:{…}}`, `{subnet:{…}}`, …), so each Kind is prefixed
+`Neutron*` to avoid the crdgen Kind-vs-property collision. (The router-interface actions are not
+envelope-wrapped; `NeutronRouterInterface` keeps the prefix for consistency.) All Kinds share the API group
 `network.openstack.krateo.io`.
 
 **Auth:** the generated controller speaks plain HTTP and can't do Keystone token exchange. This chart
@@ -66,8 +68,8 @@ kubectl apply -f examples/neutron-operator/composition.yaml
 All configuration is [`chart/values.yaml`](chart/values.yaml), typed by
 [`chart/values.schema.json`](chart/values.schema.json):
 
-- `restdefinitions.<resource>.enabled` — toggle each of the seven resources (network, subnet, router,
-  port, security_group, security_group_rule, floatingip).
+- `restdefinitions.<resource>.enabled` — toggle each of the eight resources (network, subnet, router,
+  router_interface, port, security_group, security_group_rule, floatingip).
 - `authBridge.*` — the Keystone-auth proxy: `cloudsSecret`, `osCloud`, `serviceType`, `osInterface`,
   `upstreamEndpoint` (empty = auto-discover), `image`, `service`, `resources`.
 
@@ -88,7 +90,9 @@ kubectl -n krateo-system get neutronnetworks.network.openstack.krateo.io -w
 Cross-resource references are by OpenStack UUID — read the id from the referenced CR's
 `status.<envelope>.id` and wire it into the dependent CR (e.g. `NeutronSubnet.spec.subnet.network_id`),
 or sequence them with a Composition. `NeutronSecurityGroupRule` is immutable — change a rule by
-deleting and recreating the CR.
+deleting and recreating the CR. `NeutronRouterInterface` attaches a subnet to a router
+(`spec.router_id` + `spec.subnet_id`, not envelope-wrapped); both ids are its identity, so it is
+immutable too.
 
 ## Docs
 

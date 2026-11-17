@@ -16,6 +16,10 @@ spec:
       - subnet.name
     additionalStatusFields:
       - subnet.id
+      # ALWAYS EMPTY: Neutron's subnet object has no `status` attribute (neutron/db/db_base_plugin_common.py _make_subnet_dict;
+      # the api-ref lists none). Kept only because oasgen-provider makes additionalStatusFields
+      # append-only: removing a shipped entry would make `helm upgrade` fail on every existing
+      # install. hack/validate-status-fields.py allowlists exactly this entry.
       - subnet.status
     verbsDescription:
       - action: create

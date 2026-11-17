@@ -69,3 +69,32 @@ spec:
     port_range_min: 22
     port_range_max: 22
     remote_ip_prefix: "0.0.0.0/0"
+---
+apiVersion: network.openstack.krateo.io/v1alpha1
+kind: NeutronRouter
+metadata:
+  name: demo-router
+  namespace: krateo-system
+spec:
+  configurationRef:
+    name: neutron-config-router
+    namespace: krateo-system
+  router:
+    name: demo-router
+    admin_state_up: true
+---
+# Attach demo-subnet to demo-router as an internal interface. Neither payload is
+# envelope-wrapped, so both ids sit at the top of spec. Both are the identity of
+# the attachment (there is no update verb): to move the interface, delete this CR
+# and create another.
+apiVersion: network.openstack.krateo.io/v1alpha1
+kind: NeutronRouterInterface
+metadata:
+  name: demo-router-demo-subnet
+  namespace: krateo-system
+spec:
+  configurationRef:
+    name: neutron-config-router-interface
+    namespace: krateo-system
+  router_id: "<demo-router id from NeutronRouter status.router.id>"
+  subnet_id: "<demo-subnet id from NeutronSubnet status.subnet.id>"

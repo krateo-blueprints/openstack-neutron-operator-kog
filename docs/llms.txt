@@ -6,7 +6,7 @@ docs/index.md: the map — what the blueprint is, the doc bundle, the repo layou
 docs/overview.md: architecture — the KOG generation model, per-resource OpenAPI subsets, the envelope/Neutron* naming, the auth-bridge Keystone proxy
 docs/usage.md: install (chart or Composition), supply clouds.yaml, apply Neutron CRs, wire UUID references, verify
 docs/configuration.md: the whole values surface — per-resource restdefinitions toggles and the authBridge block
-docs/api.md: the CompositionDefinition CRD, the generated Composition CR, and the seven Neutron CRDs (Kinds, group, envelope spec/status, verbs)
+docs/api.md: the CompositionDefinition CRD, the generated Composition CR, and the eight Neutron CRDs (Kinds, group, envelope spec/status, verbs)
 docs/examples.md: index of the runnable examples under examples/
 docs/release.md: how a release ships — a SemVer tag drives helm lint/package/push to GHCR
 docs/log.md: curated history
@@ -21,6 +21,8 @@ chart/values.yaml: every value with its rationale in comments
 chart/values.schema.json: the typed schema for the values above
 chart/templates/_helpers.tpl: name helpers incl. the in-cluster authBridgeUrl the controller hits
 chart/templates/rd-network.yaml: a per-resource RestDefinition — Kind, identifiers, status fields, verb-to-HTTP mapping
+chart/templates/rd-router-interface.yaml: the one findby-observed Kind — router interface found as a port via GET /v2.0/ports, matched before create
+hack/validate-status-fields.py: CI gate — every identifier/additionalStatusField resolves in its observe response schema
 chart/templates/auth-bridge-deployment.yaml: the auth-bridge Deployment (openstack-client image running the proxy)
 chart/scripts/openstack-auth-proxy.py: the openstacksdk Keystone-auth reverse proxy that injects a fresh X-Auth-Token
 chart/assets/network.yaml: a hand-crafted Neutron OAS subset (network), bundled into a ConfigMap

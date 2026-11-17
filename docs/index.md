@@ -4,7 +4,7 @@ title: openstack-neutron-operator-kog — index
 description: The map of the openstack-neutron-operator-kog doc bundle — a Krateo Operator Generator (KOG) blueprint that turns OpenStack Neutron networking resources into native Kubernetes custom resources via oasgen-provider and rest-dynamic-controller.
 resource: oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog
 tags: [kog, openstack, neutron, network, oasgen-provider, blueprint]
-timestamp: 2026-08-11T00:00:00Z
+timestamp: 2026-11-17T00:00:00Z
 ---
 
 # openstack-neutron-operator-kog
@@ -57,6 +57,7 @@ docs/                          # this bundle
 | `NeutronNetwork` | `/v2.0/networks` | create / get / update / delete |
 | `NeutronSubnet` | `/v2.0/subnets` | create / get / update / delete |
 | `NeutronRouter` | `/v2.0/routers` | create / get / update / delete |
+| `NeutronRouterInterface` | `/v2.0/routers/{router_id}/add_router_interface` · `remove_router_interface` | create / findby / delete (immutable) |
 | `NeutronPort` | `/v2.0/ports` | create / get / update / delete |
 | `NeutronSecurityGroup` | `/v2.0/security-groups` | create / get / update / delete |
 | `NeutronSecurityGroupRule` | `/v2.0/security-group-rules` | create / get / delete (immutable) |

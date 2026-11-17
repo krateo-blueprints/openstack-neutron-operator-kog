@@ -74,6 +74,28 @@
             }
           }
         },
+        "router_interface": {
+          "type": "object",
+          "description": "Neutron router interfaces: a subnet attached to a router (PUT /v2.0/routers/{router_id}/add_router_interface and remove_router_interface). No update verb: router_id and subnet_id are the identity.",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Generate the RestDefinition (and CRD) for Neutron router interfaces.",
+              "default": true
+            },
+            "resourceGroup": {
+              "type": "string",
+              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v1alpha1).",
+              "default": "network.openstack.krateo.io"
+            },
+            "resourceKind": {
+              "type": "string",
+              "description": "Generated CRD Kind. Prefixed Neutron* for consistency with the other Kinds of this group.",
+              "minLength": 1,
+              "default": "NeutronRouterInterface"
+            }
+          }
+        },
         "port": {
           "type": "object",
           "description": "Neutron ports (/v2.0/ports).",
