@@ -9,8 +9,10 @@ pinned fixtures a reader copies as-is). So the example has to be bumped by hand 
 release, and a comment saying so is prose: examples/neutron-operator/composition.yaml stayed at
 v0-1-0 through 0.1.1, matching no released CompositionDefinition.
 
-This makes the hand bump a precondition of the release instead. release-tag runs it FIRST,
-before anything is packaged, pushed or attached, so a stale example publishes nothing.
+This makes the hand bump a precondition of the release instead. hack/release-preflight runs it,
+called by the org-standard reusable release-preflight.yaml (krateo-blueprints/charts, PUBLISHING.md
+rule 12) as release-tag's first job; package-and-push needs that job, so a stale example publishes
+nothing.
 
 Usage: validate-example-versions.py <version> [examples-dir]
   version       the release version, e.g. 0.1.2 (the tag, no "v")

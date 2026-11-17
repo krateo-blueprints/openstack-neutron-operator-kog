@@ -19,7 +19,22 @@ permissions:
   packages: write
 
 jobs:
+  # The repository's own last word before anything is stamped, packaged, pushed or attached
+  # (krateo-blueprints/charts PUBLISHING.md rule 12). It runs hack/release-preflight with the tag;
+  # a non-zero exit fails this job, and package-and-push needs it, so a refusal publishes nothing.
+  #
+  # PINNED TO THE HEAD OF krateo-blueprints/charts PR "reusable release-preflight" -- that workflow is
+  # not merged or released yet. Re-pin to the released commit, with its version comment, once it is.
+  preflight:
+    permissions:
+      contents: read
+    uses: krateo-blueprints/charts/.github/workflows/release-preflight.yaml@a2a9103aad5f92d91f427fa06b8d48631de58936 # unreleased: charts PR head
+    with:
+      version: ${{ github.ref_name }}
+
   package-and-push:
+    needs:
+      - preflight
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,13 +47,6 @@ jobs:
         run: |
           echo "VERSION=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
           echo "OCI_REPO=oci://ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts" >> "$GITHUB_ENV"
-
-      # BEFORE anything is stamped, packaged, pushed or attached, so a refusal publishes nothing.
-      # Example Compositions are pinned fixtures, so nothing stamps them; their apiVersion is
-      # derived from the chart version (0.1.2 -> composition.krateo.io/v0-1-2) and must be bumped
-      # by hand. That hand bump was missed once (v0-1-0 through 0.1.1). This makes it refuse.
-      - name: Example Compositions match this release
-        run: python3 hack/validate-example-versions.py "${VERSION}" examples
 
       - name: Stamp the CompositionDefinition
         run: |

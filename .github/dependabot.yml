@@ -1,0 +1,8 @@
+# Keeps SHA-pinned actions and reusable workflows current (krateo-blueprints/charts PUBLISHING.md
+# rule 9): pins do not move on their own, so Dependabot proposes each update as a reviewed PR.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

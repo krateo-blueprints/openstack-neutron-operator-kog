@@ -1,0 +1,15 @@
+#!/bin/sh
+# Release preflight for openstack-neutron-operator-kog. The org-standard reusable workflow
+# krateo-blueprints/charts release-preflight.yaml runs this with the version being released as $1,
+# before anything is published (PUBLISHING.md rule 12); a non-zero exit refuses the release.
+#
+# Checks:
+#   - every example Composition names composition.krateo.io/v<version with dots as dashes>
+#     (nothing stamps examples/, so the bump is by hand; see hack/validate-example-versions.py).
+set -eu
+if [ "$#" -ne 1 ] || [ -z "$1" ]; then
+  echo "usage: $0 <version>" >&2
+  exit 2
+fi
+cd "$(dirname "$0")/.."
+python3 hack/validate-example-versions.py "$1" examples

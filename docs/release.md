@@ -1,7 +1,7 @@
 ---
 type: Runbook
 title: openstack-neutron-operator-kog — release
-description: How a release ships — a SemVer git tag stamps the chart and the CompositionDefinition, refuses if the example Composition names another version, then helm push to oci://ghcr.io/krateo-blueprints/charts and attaches the stamped CompositionDefinition to the release.
+description: How a release ships — a SemVer git tag runs the org release-preflight hook (refusing if the example Composition names another version), stamps the chart and the CompositionDefinition, then helm push to oci://ghcr.io/krateo-blueprints/charts and attaches the stamped CompositionDefinition to the release.
 resource: oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog
 tags: [kog, openstack, neutron, release, oci, ghcr]
 timestamp: 2026-11-17T00:00:00Z
@@ -46,19 +46,30 @@ on the remote), merge the bump, and push the tag again.
 
 ## What the workflow does
 
-On a tag matching `[0-9]+.[0-9]+.[0-9]+`, [`release-tag.yaml`](../.github/workflows/release-tag.yaml):
+On a tag matching `[0-9]+.[0-9]+.[0-9]+`, [`release-tag.yaml`](../.github/workflows/release-tag.yaml)
+runs two jobs.
+
+**`preflight`** calls the org-standard reusable `release-preflight.yaml` from krateo-blueprints/charts
+(PUBLISHING.md rule 12). That workflow runs this repository's executable
+[`hack/release-preflight`](../hack/release-preflight) with the tag as `$1`. Here it **refuses the
+release** unless every `composition.krateo.io` Composition under `examples/` names
+`v<tag with dots as dashes>` ([`hack/validate-example-versions.py`](../hack/validate-example-versions.py)).
+
+**`package-and-push`** declares `needs: preflight`, so a refusal publishes nothing. It:
 
 1. checks out the repo and installs Helm;
-2. **refuses the release** unless every `composition.krateo.io` Composition under `examples/` names
-   `v<tag with dots as dashes>` ([`hack/validate-example-versions.py`](../hack/validate-example-versions.py)).
-   It runs before anything is stamped or pushed;
-3. stamps `CHART_VERSION` in the root `compositiondefinition.yaml` with the tag;
-4. logs in to GHCR with the workflow `GITHUB_TOKEN`;
-5. stamps `CHART_VERSION` in `Chart.yaml`, then `helm package --version <tag>` and `helm push`;
-6. creates the GitHub release if needed and attaches the stamped `compositiondefinition.yaml`.
+2. stamps `CHART_VERSION` in the root `compositiondefinition.yaml` with the tag;
+3. logs in to GHCR with the workflow `GITHUB_TOKEN`;
+4. stamps `CHART_VERSION` in `Chart.yaml`, then `helm package --version <tag>` and `helm push`;
+5. creates the GitHub release if needed and attaches the stamped `compositiondefinition.yaml`.
 
 `helm lint` / `helm template` and the `status-fields` gate run on pull requests
 ([`.github/workflows/lint.yaml`](../.github/workflows/lint.yaml)), not on the tag.
+
+The `preflight` job is pinned by commit SHA. Until the reusable workflow is merged and released in
+krateo-blueprints/charts, that SHA is the head of the PR that adds it; re-pin to the released commit,
+with its `# x.y.z` comment, once it is. [`.github/dependabot.yml`](../.github/dependabot.yml) keeps the pin
+current after that (PUBLISHING.md rule 9).
 
 ## Documentation gate
 

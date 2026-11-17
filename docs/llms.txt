@@ -23,7 +23,8 @@ chart/templates/_helpers.tpl: name helpers incl. the in-cluster authBridgeUrl th
 chart/templates/rd-network.yaml: a per-resource RestDefinition — Kind, identifiers, status fields, verb-to-HTTP mapping
 chart/templates/rd-router-interface.yaml: the one findby-observed Kind — router interface found as a port via GET /v2.0/ports, matched before create
 hack/validate-status-fields.py: CI gate — every identifier/additionalStatusField resolves in its observe response schema
-hack/validate-example-versions.py: release gate — example Compositions must name v<tag>; release-tag refuses otherwise
+hack/release-preflight: run by the org release-preflight workflow with the tag before anything is published; non-zero refuses the release
+hack/validate-example-versions.py: what the preflight checks — example Compositions must name v<tag>
 chart/templates/auth-bridge-deployment.yaml: the auth-bridge Deployment (openstack-client image running the proxy)
 chart/scripts/openstack-auth-proxy.py: the openstacksdk Keystone-auth reverse proxy that injects a fresh X-Auth-Token
 chart/assets/network.yaml: a hand-crafted Neutron OAS subset (network), bundled into a ConfigMap
