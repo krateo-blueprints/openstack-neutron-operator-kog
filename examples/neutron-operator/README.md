@@ -43,7 +43,7 @@ kubectl apply -f composition.yaml
 
 This example pins the Neutron endpoint (`authBridge.upstreamEndpoint`), enables the `network` and
 `subnet` RestDefinitions, and disables `floatingip` to show how to toggle resources. The generated
-Composition CR is `composition.krateo.io/v0-1-0`, Kind `OpenstackNeutronOperatorKog` — see
+Composition CR is `composition.krateo.io/v0-1-2` (for chart `0.1.2`), Kind `OpenstackNeutronOperatorKog` — see
 [../../docs/api.md](../../docs/api.md) for how that Kind/apiVersion is derived.
 
 Wait for a RestDefinition to become Ready:
