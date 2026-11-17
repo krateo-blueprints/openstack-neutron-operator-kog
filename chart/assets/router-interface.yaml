@@ -1,0 +1,198 @@
+openapi: 3.0.3
+info:
+  title: OpenStack Networking (Neutron) v2.0 - Router interfaces (KOG-friendly subset)
+  description: |
+    Hand-crafted OpenAPI 3.0 subset of the Neutron v2.0 API covering the attachment of
+    a subnet to a router as an internal interface. Field names follow the Neutron
+    networking api-ref (https://docs.openstack.org/api-ref/network/v2/):
+
+      - PUT /v2.0/routers/{router_id}/add_router_interface     ("Add interface to router")
+      - PUT /v2.0/routers/{router_id}/remove_router_interface  ("Remove interface from router")
+      - GET /v2.0/ports                                        ("List ports")
+
+    Unlike the other Neutron resources, these two router actions are NOT envelope-wrapped:
+    the request body is a bare {subnet_id} and the response a bare router-interface info
+    object. So the CR uses spec.router_id + spec.subnet_id at the top level.
+
+    The interface itself has no resource of its own in Neutron. What exists afterwards is
+    a PORT on the subnet whose device_id is the router and whose device_owner is one of
+    the router-interface owners. That port is how the controller observes the attachment,
+    via GET /v2.0/ports (see the findby verb in the RestDefinition).
+
+    Only subnet_id is declared in the request bodies, deliberately: the generated
+    controller fills a request body from every same-named field in the CR's spec AND
+    status, and status carries port_id. Declaring port_id here would put it into the
+    remove_router_interface body as well, which Neutron accepts only when the subnet is
+    the port's first fixed IP (otherwise 409).
+
+    No `security` requirement is declared. Neither oasgen-provider nor
+    rest-dynamic-controller reads security requirements -- only securitySchemes, which
+    is what generates the <Kind>Configuration CRD. The auth-bridge injects the real
+    X-Auth-Token on every call.
+  version: "2.0"
+servers:
+  - url: {{ include "openstack-neutron-operator-kog.authBridgeUrl" . }}
+    description: In-cluster Keystone-auth proxy in front of Neutron
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+  schemas:
+    RouterInterfaceRequest:
+      type: object
+      required:
+        - subnet_id
+      properties:
+        subnet_id:
+          type: string
+          description: |
+            The ID of the subnet to attach to (or detach from) the router. Its
+            gateway_ip becomes the router's address on that subnet.
+    RouterInterfaceInfo:
+      type: object
+      description: Response of add_router_interface / remove_router_interface (no envelope).
+      properties:
+        id:
+          type: string
+          description: The ID of the router.
+        subnet_id:
+          type: string
+          description: The ID of the subnet (deprecated upstream by IPv6 multi-prefix; see subnet_ids).
+        subnet_ids:
+          type: array
+          description: The IDs of every subnet on the interface port.
+          items:
+            type: string
+        port_id:
+          type: string
+          description: The ID of the router interface port.
+        network_id:
+          type: string
+          description: The ID of the network the interface is on.
+        project_id:
+          type: string
+        tenant_id:
+          type: string
+    FixedIp:
+      type: object
+      properties:
+        ip_address:
+          type: string
+        subnet_id:
+          type: string
+    Port:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the port.
+        name:
+          type: string
+        network_id:
+          type: string
+        device_id:
+          type: string
+          description: The ID of the device that uses this port (the router, for an interface port).
+        device_owner:
+          type: string
+          description: |
+            The entity type that uses this port. Router interface ports carry one of
+            network:router_interface, network:router_interface_distributed (DVR) or
+            network:ha_router_replicated_interface (HA).
+        status:
+          type: string
+          description: The port status, e.g. ACTIVE or DOWN.
+        fixed_ips:
+          type: array
+          items:
+            $ref: '#/components/schemas/FixedIp'
+    PortList:
+      type: object
+      properties:
+        ports:
+          type: array
+          items:
+            $ref: '#/components/schemas/Port'
+paths:
+  /v2.0/routers/{router_id}/add_router_interface:
+    parameters:
+      - name: router_id
+        in: path
+        required: true
+        description: The ID of the router.
+        schema:
+          type: string
+    put:
+      operationId: addRouterInterface
+      summary: Add interface to router
+      tags:
+        - v2.0/routers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouterInterfaceRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouterInterfaceInfo'
+  /v2.0/routers/{router_id}/remove_router_interface:
+    parameters:
+      - name: router_id
+        in: path
+        required: true
+        description: The ID of the router.
+        schema:
+          type: string
+    put:
+      operationId: removeRouterInterface
+      summary: Remove interface from router
+      tags:
+        - v2.0/routers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouterInterfaceRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouterInterfaceInfo'
+  /v2.0/ports:
+    get:
+      operationId: listPorts
+      summary: List ports
+      tags:
+        - v2.0/ports
+      parameters:
+        - name: device_id
+          in: query
+          required: false
+          description: Filter the port list by the ID of the device that uses the port (here, the router).
+          schema:
+            type: string
+        - name: fixed_ips
+          in: query
+          required: false
+          description: |
+            Filter the port list by fixed IP. Each entry is key=value, with key one of
+            ip_address, ip_address_substr or subnet_id. Neutron accepts the parameter
+            repeated; this subset sends exactly one entry, subnet_id=<id>.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortList'

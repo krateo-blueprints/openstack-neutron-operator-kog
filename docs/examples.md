@@ -4,7 +4,7 @@ title: openstack-neutron-operator-kog — examples
 description: Index of the runnable examples under examples/ — installing the KOG operator as a Composition and creating Neutron resources.
 resource: oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog
 tags: [kog, openstack, neutron, examples]
-timestamp: 2026-08-11T00:00:00Z
+timestamp: 2026-11-17T00:00:00Z
 ---
 
 # Examples
@@ -13,7 +13,7 @@ Runnable examples live under [`examples/`](../examples).
 
 | Example | What it shows |
 |---------|---------------|
-| [neutron-operator](../examples/neutron-operator/README.md) | Install the operator layer as a Krateo Composition (`OpenstackNeutronOperatorKog`), then create sample Neutron CRs (`NeutronNetwork` / `NeutronSubnet` / `NeutronSecurityGroup` / `NeutronSecurityGroupRule`) that reconcile into real Neutron objects. |
+| [neutron-operator](../examples/neutron-operator/README.md) | Install the operator layer as a Krateo Composition (`OpenstackNeutronOperatorKog`), then create sample Neutron CRs (`NeutronNetwork` / `NeutronSubnet` / `NeutronSecurityGroup` / `NeutronSecurityGroupRule` / `NeutronRouter` / `NeutronRouterInterface`) that reconcile into real Neutron objects. |
 
 The example ships two manifests:
 

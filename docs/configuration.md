@@ -4,7 +4,7 @@ title: openstack-neutron-operator-kog — configuration
 description: The whole values surface of the chart — the per-resource RestDefinition toggles and the auth-bridge block (clouds Secret, endpoint discovery, image, resources) — plus the CompositionDefinition input mapping.
 resource: oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog
 tags: [kog, openstack, neutron, values, configuration, auth-bridge]
-timestamp: 2026-08-11T00:00:00Z
+timestamp: 2026-11-17T00:00:00Z
 ---
 
 # Configuration
@@ -17,7 +17,7 @@ are set under the Composition CR's `spec` (see [`examples/neutron-operator/compo
 
 One block per Neutron resource. Each controls whether the chart emits that resource's
 `RestDefinition` (and therefore the generated CRD). The three keys are identical in shape across all
-seven resources:
+eight resources:
 
 | Key | Type | Default | Meaning |
 |-----|------|---------|---------|
@@ -25,13 +25,14 @@ seven resources:
 | `resourceGroup` | string | `network.openstack.krateo.io` | Kubernetes API group for the generated CRD (GVK = `<resourceGroup>/v1alpha1`). |
 | `resourceKind` | string | `Neutron<Resource>` | Generated CRD Kind. Prefixed `Neutron*` to avoid the crdgen Kind-vs-envelope-property collision. |
 
-The seven resource blocks and their default Kinds:
+The eight resource blocks and their default Kinds:
 
 | Block | Neutron API | Default `resourceKind` |
 |-------|-------------|------------------------|
 | `network` | `/v2.0/networks` | `NeutronNetwork` |
 | `subnet` | `/v2.0/subnets` | `NeutronSubnet` |
 | `router` | `/v2.0/routers` | `NeutronRouter` |
+| `router_interface` | `/v2.0/routers/{router_id}/add_router_interface` · `remove_router_interface` | `NeutronRouterInterface` |
 | `port` | `/v2.0/ports` | `NeutronPort` |
 | `security_group` | `/v2.0/security-groups` | `NeutronSecurityGroup` |
 | `security_group_rule` | `/v2.0/security-group-rules` | `NeutronSecurityGroupRule` |
@@ -46,6 +47,8 @@ restdefinitions:
   subnet:
     enabled: true
   router:
+    enabled: false
+  router_interface:
     enabled: false
   port:
     enabled: false

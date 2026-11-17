@@ -4,7 +4,7 @@ title: openstack-neutron-operator-kog — usage
 description: How to install the blueprint (chart or Composition), supply the admin clouds.yaml Secret, apply Neutron CRs, wire cross-resource UUID references, and verify the objects in Horizon.
 resource: oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog
 tags: [kog, openstack, neutron, install, composition, usage]
-timestamp: 2026-08-11T00:00:00Z
+timestamp: 2026-11-17T00:00:00Z
 ---
 
 # Usage
@@ -134,5 +134,12 @@ The objects also appear in the OpenStack **Horizon** dashboard under **Network �
   used to install (default `krateo-system`).
 - **Security-group rules are immutable.** To change a `NeutronSecurityGroupRule`, delete and recreate
   the CR.
+- **Router interfaces are immutable.** `spec.router_id` and `spec.subnet_id` are the identity of a
+  `NeutronRouterInterface`. Editing either on a live CR attaches the new pair and leaves the old one
+  attached; delete the CR (which detaches) and create a new one instead.
+- **Some status columns are always empty.** `status.subnet.status`, `status.security_group.status` and
+  `status.security_group_rule.status` never fill in: Neutron's subnet, security-group and
+  security-group-rule objects have no `status` attribute. They stay declared only because
+  oasgen-provider makes `additionalStatusFields` append-only (see [api.md](api.md)).
 - **Toggle resources you do not need** via `restdefinitions.<resource>.enabled=false` (see
   [configuration.md](configuration.md)) — fewer CRDs, less surface.

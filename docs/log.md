@@ -4,12 +4,29 @@ title: openstack-neutron-operator-kog — log
 description: Curated chronological history of the OpenStack Neutron KOG blueprint — notable changes and decisions, not a generated changelog.
 resource: oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog
 tags: [kog, openstack, neutron, log, history]
-timestamp: 2026-08-11T00:00:00Z
+timestamp: 2026-11-17T00:00:00Z
 ---
 
 # Log
 
 Curated history of notable changes and decisions. Newest first.
+
+## Unreleased — `NeutronRouterInterface`; three status fields that never fill in
+
+- New Kind **`NeutronRouterInterface`**: attaches a subnet to a router
+  (`PUT /v2.0/routers/{router_id}/add_router_interface`) and detaches it on delete
+  (`remove_router_interface`). Until now no Kind could do this — `NeutronRouter`'s update can set the
+  external gateway but not internal interfaces. Toggle: `restdefinitions.router_interface.enabled`.
+- It is observed with a **findby** over `GET /v2.0/ports` that genuinely matches an existing
+  attachment, because Neutron answers a second attach with a permanent 400. The subnet is matched by
+  Neutron's `fixed_ips=subnet_id=` filter; the router client-side, after a transform that keeps only
+  router-interface ports. Rationale in [api.md](api.md#neutronrouterinterface--a-subnet-attached-to-a-router).
+  **Not yet exercised against a live Neutron.**
+- Found while auditing status fields: `NeutronSubnet`, `NeutronSecurityGroup` and
+  `NeutronSecurityGroupRule` declare `<envelope>.status`, which Neutron's objects do not have, so those
+  columns were always empty. They stay (oasgen-provider makes `additionalStatusFields` append-only), now
+  documented, and a new failing CI job (`status-fields`) rejects any further status field its observe
+  response cannot carry.
 
 ## 2026-08-11 — Adopt the OKF documentation standard
 

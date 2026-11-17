@@ -42,3 +42,29 @@ jobs:
             helm lint "$dir" || true
             echo "::endgroup::"
           done < <(find . -type f -name Chart.yaml -not -path '*/charts/*' -not -path './.git/*' -print0)
+
+  # Unlike the informational helm job above, this one FAILS the build. Every identifier and
+  # additionalStatusField of every RestDefinition must be present in the response schema its
+  # observe verb reads; rest-dynamic-controller silently skips one that is not, so the status
+  # column stays empty forever. See hack/validate-status-fields.py.
+  status-fields:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyYAML
+        run: python3 -m pip install "pyyaml==6.0.2"
+
+      - name: Stamp the CHART_VERSION placeholder for CI
+        run: sed -i "s/CHART_VERSION/0.0.0-ci/g" chart/Chart.yaml
+
+      - name: Every status field resolves in its observe response
+        run: python3 hack/validate-status-fields.py chart

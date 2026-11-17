@@ -4,7 +4,7 @@ title: neutron-operator — install the KOG operator and create Neutron resource
 description: A runnable example of the OpenStack Neutron KOG — the Composition that installs the operator layer (auth-bridge + RestDefinitions) plus sample Neutron CRs (network, subnet, security group, security-group rule) that reconcile into real Neutron objects.
 resource: oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog
 tags: [example, kog, openstack, neutron, composition]
-timestamp: 2026-08-11T00:00:00Z
+timestamp: 2026-11-17T00:00:00Z
 ---
 
 # neutron-operator
@@ -15,7 +15,8 @@ A complete, runnable example of the OpenStack Neutron KOG blueprint. It has two 
   (`OpenstackNeutronOperatorKog`) that installs the auth-bridge proxy plus the per-resource
   RestDefinitions and their generated CRDs. It does **not** create any Neutron object itself.
 - [`network-resources.yaml`](network-resources.yaml) — sample **Neutron CRs**
-  (`NeutronNetwork` / `NeutronSubnet` / `NeutronSecurityGroup` / `NeutronSecurityGroupRule`) plus the
+  (`NeutronNetwork` / `NeutronSubnet` / `NeutronSecurityGroup` / `NeutronSecurityGroupRule` /
+  `NeutronRouter` / `NeutronRouterInterface`) plus the
   `<Kind>Configuration` that carries the bearer token. Applying these creates real Neutron objects.
 
 ## Prerequisites

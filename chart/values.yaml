@@ -17,6 +17,12 @@ restdefinitions:
     enabled: true
     resourceGroup: network.openstack.krateo.io
     resourceKind: NeutronRouter
+  # A subnet attached to a router as an internal interface (add_router_interface /
+  # remove_router_interface). Not envelope-wrapped; the CR is spec.router_id + spec.subnet_id.
+  router_interface:
+    enabled: true
+    resourceGroup: network.openstack.krateo.io
+    resourceKind: NeutronRouterInterface
   port:
     enabled: true
     resourceGroup: network.openstack.krateo.io

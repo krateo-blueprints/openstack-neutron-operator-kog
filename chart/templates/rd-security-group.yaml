@@ -16,6 +16,10 @@ spec:
       - security_group.name
     additionalStatusFields:
       - security_group.id
+      # ALWAYS EMPTY: Neutron's security_group object has no `status` attribute (neutron/db/securitygroups_db.py _make_security_group_dict;
+      # the api-ref lists none). Kept only because oasgen-provider makes additionalStatusFields
+      # append-only: removing a shipped entry would make `helm upgrade` fail on every existing
+      # install. hack/validate-status-fields.py allowlists exactly this entry.
       - security_group.status
     verbsDescription:
       - action: create

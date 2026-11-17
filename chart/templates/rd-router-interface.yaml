@@ -1,0 +1,90 @@
+{{- if .Values.restdefinitions.router_interface.enabled }}
+apiVersion: ogen.krateo.io/v1alpha1
+kind: RestDefinition
+metadata:
+  name: {{ .Release.Name }}-router-interface
+  labels:
+    {{- include "openstack-neutron-operator-kog.labels" . | nindent 4 }}
+spec:
+  oasPath: configmap://{{ .Release.Namespace }}/{{ .Release.Name }}-router-interface/routerinterface.yaml
+  resourceGroup: {{ .Values.restdefinitions.router_interface.resourceGroup }}
+  resource:
+    # A subnet attached to a router as an internal interface.
+    #
+    # Neutron exposes this as two router ACTIONS (add_router_interface / remove_router_interface),
+    # not as a resource with its own id, and a second add for the same subnet is a PERMANENT 400
+    # ("Router already has a port on subnet <id>", neutron/db/l3_db.py _check_for_dup_router_subnets).
+    # So the observe step must genuinely find an existing attachment, or every reconcile after the
+    # first would re-fire the create and fail forever.
+    #
+    # What exists after an attach is a PORT: device_id = the router, a fixed IP on the subnet, and
+    # device_owner one of neutron_lib.constants.ROUTER_INTERFACE_OWNERS. The findby below lists exactly
+    # those ports:
+    #
+    #   GET /v2.0/ports?device_id=<spec.router_id>&fixed_ips=subnet_id%3D<spec.subnet_id>
+    #
+    # - The SUBNET is matched by Neutron's own fixed_ips filter (neutron/db/db_base_plugin_v2.py
+    #   _get_ports_query: Port.fixed_ips.any(IPAllocation.subnet_id.in_(...))). It has to be done there:
+    #   rest-dynamic-controller's identifier matcher walks maps only (unstructured.NestedFieldNoCopy), so
+    #   no identifier can reach into the fixed_ips ARRAY, and an IPv6 interface port can carry several
+    #   subnets, so lifting fixed_ips[0] would miss.
+    # - The ROUTER is matched client-side: the responseTransform keeps device_id only on a
+    #   router-interface port (dropping it from the gateway port, the DVR centralized-SNAT port and the
+    #   HA-network port, which share device_id), the fieldMapping lifts it to router_id, and the AND
+    #   identifier policy requires it to equal spec.router_id.
+    #
+    # Both run BEFORE matching: findby normalizes each listed item (responseTransform, then the
+    # response-direction fieldMapping) and only then compares it against the CR.
+    #
+    # oasgen-provider's identifier-matchability check reads the RAW item schema and does not apply
+    # fieldMapping, so it may warn that `router_id` is absent from the findby items. It is absent from
+    # the raw port and present after normalization, which is what the matcher sees.
+    #
+    # No update verb: router_id and subnet_id ARE the identity. Changing either on a live CR attaches
+    # the new pair and leaves the old one attached; delete and recreate the CR instead.
+    kind: {{ .Values.restdefinitions.router_interface.resourceKind }}
+    identifiers:
+      - router_id
+    additionalStatusFields:
+      - port_id
+      - network_id
+      - device_owner
+      - fixed_ips
+      - port_status
+    verbsDescription:
+      - action: create
+        method: PUT
+        path: /v2.0/routers/{router_id}/add_router_interface
+      - action: findby
+        method: GET
+        path: /v2.0/ports
+        itemsPath: ports
+        identifiersMatchPolicy: AND
+        responseTransform:
+          inline: >-
+            if (.device_owner == "network:router_interface"
+                or .device_owner == "network:router_interface_distributed"
+                or .device_owner == "network:ha_router_replicated_interface")
+            then .
+            else del(.device_id)
+            end
+        fieldMapping:
+          - inQuery: device_id
+            inCustomResource: spec.router_id
+          - inQuery: fixed_ips
+            inCustomResource: spec.subnet_id
+            valueMapping:
+              type: jq
+              jq:
+                inline: '"subnet_id=" + .'
+          - inResponse: device_id
+            inCustomResource: status.router_id
+          - inResponse: id
+            inCustomResource: status.port_id
+          # The port's own status (ACTIVE / DOWN), renamed so it does not read as status.status.
+          - inResponse: status
+            inCustomResource: status.port_status
+      - action: delete
+        method: PUT
+        path: /v2.0/routers/{router_id}/remove_router_interface
+{{- end }}
