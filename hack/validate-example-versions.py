@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+"""Refuse a release whose example Compositions name a different chart version.
+
+WHY THIS EXISTS. crdgen derives a Composition's apiVersion from the chart version of the
+CompositionDefinition that registers it: chart 0.1.2 -> composition.krateo.io/v0-1-2, and a CD
+at that version serves ONLY that version. release-tag stamps Chart.yaml and the root
+compositiondefinition.yaml from the tag, but it deliberately does not touch examples/ (they are
+pinned fixtures a reader copies as-is). So the example has to be bumped by hand on every
+release, and a comment saying so is prose: examples/neutron-operator/composition.yaml stayed at
+v0-1-0 through 0.1.1, matching no released CompositionDefinition.
+
+This makes the hand bump a precondition of the release instead. release-tag runs it FIRST,
+before anything is packaged, pushed or attached, so a stale example publishes nothing.
+
+Usage: validate-example-versions.py <version> [examples-dir]
+  version       the release version, e.g. 0.1.2 (the tag, no "v")
+  examples-dir  defaults to "examples"
+
+Every YAML document under examples-dir whose apiVersion is in the composition.krateo.io group
+must be exactly composition.krateo.io/v<version with dots as dashes>. Regex-driven rather than
+YAML-parsed so it needs nothing beyond the standard library on the runner; apiVersion is only
+matched at the start of a line, so the derivation notes in comments are not read as manifests.
+
+Exit 1 on any mismatch, on a malformed version, or if no Composition is found at all (a gate
+with no input must not pass).
+"""
+import pathlib
+import re
+import sys
+
+GROUP = "composition.krateo.io"
+SEMVER = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
+API_VERSION = re.compile(r"^apiVersion:\s*[\"']?" + re.escape(GROUP) + r"/([^\s\"'#]+)", re.M)
+
+
+def main(version, examples_dir):
+    if not SEMVER.match(version):
+        print("FAIL: %r is not a MAJOR.MINOR.PATCH version" % version)
+        return 1
+    want = "v" + version.replace(".", "-")
+    root = pathlib.Path(examples_dir)
+    if not root.is_dir():
+        print("FAIL: %s does not exist -- nothing was checked" % root)
+        return 1
+
+    found, bad = 0, []
+    for path in sorted(list(root.rglob("*.yaml")) + list(root.rglob("*.yml"))):
+        for doc in re.split(r"^---\s*$", path.read_text(), flags=re.M):
+            for got in API_VERSION.findall(doc):
+                found += 1
+                if got == want:
+                    print("ok    %s  %s/%s" % (path, GROUP, got))
+                else:
+                    bad.append("%s: apiVersion %s/%s, but this release (%s) serves %s/%s"
+                               % (path, GROUP, got, version, GROUP, want))
+
+    if found == 0:
+        print("FAIL: no %s Composition found under %s -- nothing was checked" % (GROUP, root))
+        return 1
+    for b in bad:
+        print("FAIL: " + b)
+    if bad:
+        print("Bump the example(s) to %s/%s, merge, then tag again." % (GROUP, want))
+        return 1
+    print("checked %d Composition(s) against %s" % (found, version))
+    return 0
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("usage: %s <version> [examples-dir]" % sys.argv[0])
+        sys.exit(2)
+    sys.exit(main(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else "examples"))

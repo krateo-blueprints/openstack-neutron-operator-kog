@@ -1,57 +1,64 @@
 ---
 type: Runbook
 title: openstack-neutron-operator-kog — release
-description: How a release ships — a SemVer git tag matching Chart.yaml drives helm lint, helm package, and helm push to oci://ghcr.io/krateo-blueprints/charts, which the CompositionDefinition then points at.
+description: How a release ships — a SemVer git tag stamps the chart and the CompositionDefinition, refuses if the example Composition names another version, then helm push to oci://ghcr.io/krateo-blueprints/charts and attaches the stamped CompositionDefinition to the release.
 resource: oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog
 tags: [kog, openstack, neutron, release, oci, ghcr]
-timestamp: 2026-08-11T00:00:00Z
+timestamp: 2026-11-17T00:00:00Z
 ---
 
 # Release
 
-The chart is published as an OCI artifact to GHCR by the `release-chart` workflow
+The chart is published as an OCI artifact to GHCR by the `release-tag` workflow
 ([`.github/workflows/release-tag.yaml`](../.github/workflows/release-tag.yaml)).
 
 ## What ships
 
-One artifact: the Helm chart under [`chart/`](../chart), pushed to
-`oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog`. The
-[`compositiondefinition.yaml`](../compositiondefinition.yaml) `spec.chart.url` points at that artifact,
-and `spec.chart.version` selects the tag.
+- The Helm chart under [`chart/`](../chart), pushed to
+  `oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog:<tag>`.
+- The CompositionDefinition, attached to the GitHub release as `compositiondefinition.yaml`.
+
+In git, both [`chart/Chart.yaml`](../chart/Chart.yaml) `version` and
+[`compositiondefinition.yaml`](../compositiondefinition.yaml) `spec.chart.version` are the
+`CHART_VERSION` placeholder. The workflow stamps both from the tag, so neither is bumped by hand.
+Apply the CompositionDefinition attached to the release, not the one in the repository.
 
 ## How a release is cut
 
-1. Bump `version` (and, if it moved, `appVersion`) in [`chart/Chart.yaml`](../chart/Chart.yaml).
-2. Push a **SemVer tag** that matches `Chart.yaml` `version` exactly — e.g. for `version: 0.1.0`:
+1. Bump the example Composition's apiVersion to the new version, merged on `main`. crdgen derives the
+   Composition's apiVersion from the chart version (`0.1.3` → `composition.krateo.io/v0-1-3`), and a
+   CompositionDefinition at that version serves only that one. Nothing stamps `examples/`, so this is
+   the one hand edit:
+   - [`examples/neutron-operator/composition.yaml`](../examples/neutron-operator/composition.yaml)
+     `apiVersion` (required; the release refuses without it), and
+   - the derivation examples in [usage.md](usage.md), [api.md](api.md),
+     [`examples/neutron-operator/README.md`](../examples/neutron-operator/README.md) and the pin at the
+     top of [`docs/llms.txt`](llms.txt) (prose; not checked).
+2. Push a **SemVer tag**, with no `v` prefix:
 
    ```bash
-   git tag 0.1.0
-   git push origin 0.1.0
+   git tag 0.1.3
+   git push origin 0.1.3
    ```
 
-   The tag has no `v` prefix; it must equal the chart version (the workflow fails the release if they
-   differ).
-
-The workflow can also be run manually via **workflow_dispatch**.
+If the release refuses at the example check, nothing has been published yet. Delete the tag (locally and
+on the remote), merge the bump, and push the tag again.
 
 ## What the workflow does
 
-On a matching tag (`[0-9]+.[0-9]+.[0-9]+`) or manual dispatch it:
+On a tag matching `[0-9]+.[0-9]+.[0-9]+`, [`release-tag.yaml`](../.github/workflows/release-tag.yaml):
 
-1. checks out the repo and installs Helm (`v3.19.0`);
-2. runs `helm lint chart` (validates the chart and its `values.schema.json`);
-3. verifies the git tag matches `Chart.yaml` `version` (tag runs only);
-4. runs `helm package chart` — note `helm package` does **not** render templates, so a chart that
-   needs runtime input still packages;
-5. logs in to GHCR with the workflow `GITHUB_TOKEN`;
-6. runs `helm push` to `oci://ghcr.io/<owner>/charts`, retrying on GHCR first-push flakiness.
+1. checks out the repo and installs Helm;
+2. **refuses the release** unless every `composition.krateo.io` Composition under `examples/` names
+   `v<tag with dots as dashes>` ([`hack/validate-example-versions.py`](../hack/validate-example-versions.py)).
+   It runs before anything is stamped or pushed;
+3. stamps `CHART_VERSION` in the root `compositiondefinition.yaml` with the tag;
+4. logs in to GHCR with the workflow `GITHUB_TOKEN`;
+5. stamps `CHART_VERSION` in `Chart.yaml`, then `helm package --version <tag>` and `helm push`;
+6. creates the GitHub release if needed and attaches the stamped `compositiondefinition.yaml`.
 
-## After publishing
-
-- Update `compositiondefinition.yaml` `spec.chart.version` to the new tag (and
-  `examples/neutron-operator/composition.yaml` if it pins a version) so consumers install the new
-  chart.
-- Update the pin at the top of [`docs/llms.txt`](llms.txt) to match the released version.
+`helm lint` / `helm template` and the `status-fields` gate run on pull requests
+([`.github/workflows/lint.yaml`](../.github/workflows/lint.yaml)), not on the tag.
 
 ## Documentation gate
 
