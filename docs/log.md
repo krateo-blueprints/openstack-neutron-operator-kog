@@ -4,14 +4,26 @@ title: openstack-neutron-operator-kog — log
 description: Curated chronological history of the OpenStack Neutron KOG blueprint — notable changes and decisions, not a generated changelog.
 resource: oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog
 tags: [kog, openstack, neutron, log, history]
-timestamp: 2026-11-17T00:00:00Z
+timestamp: 2026-11-18T00:00:00Z
 ---
 
 # Log
 
 Curated history of notable changes and decisions. Newest first.
 
-## Unreleased — `NeutronRouterInterface`; three status fields that never fill in
+## Unreleased — the Neutron Kinds are `v2-0`, not `v1alpha1`; findby gate
+
+- oasgen-provider serves each Neutron Kind at the version it derives from the OAS `info.version`. That
+  is `"2.0"`, which becomes `v2-0` (oasgen-provider `internal/tools/render/render.go` `TargetVersion`,
+  using plumbing `crdgen.NormalizeVersionName`). The README, docs, `values.schema.json` and samples said
+  `v1alpha1`, which is only the `<Kind>Configuration` version, so applying a sample failed with "no matches
+  for kind". That included the `NeutronRouterInterface` sample added in 0.1.2. Measured on keystone-kog
+  (`"3.0"` → `v3-0`) with oasgen-provider 0.80.0; the rule is the same.
+- New CI gate `hack/validate-findby-identifiers.py`, the same check keystone-kog 0.4.2 introduced: every
+  findby identifier must be a key of the declared list item. `NeutronRouterInterface` passes, matching
+  `router_id` lifted from `device_id`.
+
+## 0.1.2 — `NeutronRouterInterface`; three status fields that never fill in
 
 - New Kind **`NeutronRouterInterface`**: attaches a subnet to a router
   (`PUT /v2.0/routers/{router_id}/add_router_interface`) and detaches it on delete

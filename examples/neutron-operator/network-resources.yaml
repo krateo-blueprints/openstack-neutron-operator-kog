@@ -17,7 +17,7 @@ spec:
     bearer:
       tokenRef: { name: neutron-token, namespace: krateo-system, key: token }
 ---
-apiVersion: network.openstack.krateo.io/v1alpha1
+apiVersion: network.openstack.krateo.io/v2-0
 kind: NeutronNetwork
 metadata:
   name: demo-net
@@ -28,7 +28,7 @@ spec:
     name: demo-net
     admin_state_up: true
 ---
-apiVersion: network.openstack.krateo.io/v1alpha1
+apiVersion: network.openstack.krateo.io/v2-0
 kind: NeutronSubnet
 metadata:
   name: demo-subnet
@@ -43,7 +43,7 @@ spec:
     ip_version: 4
     enable_dhcp: true
 ---
-apiVersion: network.openstack.krateo.io/v1alpha1
+apiVersion: network.openstack.krateo.io/v2-0
 kind: NeutronSecurityGroup
 metadata:
   name: demo-sg
@@ -54,7 +54,7 @@ spec:
     name: demo-sg
     description: Created by neutron-kog
 ---
-apiVersion: network.openstack.krateo.io/v1alpha1
+apiVersion: network.openstack.krateo.io/v2-0
 kind: NeutronSecurityGroupRule
 metadata:
   name: demo-sg-ssh
@@ -70,7 +70,7 @@ spec:
     port_range_max: 22
     remote_ip_prefix: "0.0.0.0/0"
 ---
-apiVersion: network.openstack.krateo.io/v1alpha1
+apiVersion: network.openstack.krateo.io/v2-0
 kind: NeutronRouter
 metadata:
   name: demo-router
@@ -87,7 +87,7 @@ spec:
 # envelope-wrapped, so both ids sit at the top of spec. Both are the identity of
 # the attachment (there is no update verb): to move the interface, delete this CR
 # and create another.
-apiVersion: network.openstack.krateo.io/v1alpha1
+apiVersion: network.openstack.krateo.io/v2-0
 kind: NeutronRouterInterface
 metadata:
   name: demo-router-demo-subnet

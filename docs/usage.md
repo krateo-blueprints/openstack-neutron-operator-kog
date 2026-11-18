@@ -4,7 +4,7 @@ title: openstack-neutron-operator-kog — usage
 description: How to install the blueprint (chart or Composition), supply the admin clouds.yaml Secret, apply Neutron CRs, wire cross-resource UUID references, and verify the objects in Horizon.
 resource: oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog
 tags: [kog, openstack, neutron, install, composition, usage]
-timestamp: 2026-11-17T00:00:00Z
+timestamp: 2026-11-18T00:00:00Z
 ---
 
 # Usage
@@ -92,7 +92,7 @@ kubectl -n krateo-system get neutronnetworks.network.openstack.krateo.io -w
 A minimal `NeutronNetwork`:
 
 ```yaml
-apiVersion: network.openstack.krateo.io/v1alpha1
+apiVersion: network.openstack.krateo.io/v2-0
 kind: NeutronNetwork
 metadata:
   name: demo-net

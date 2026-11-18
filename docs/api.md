@@ -4,7 +4,7 @@ title: openstack-neutron-operator-kog — API
 description: The CompositionDefinition CRD that registers this blueprint, the generated Composition CR, and the eight generated Neutron CRDs (Kinds, API group, envelope-shaped spec/status, and verb-to-HTTP mappings).
 resource: oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog
 tags: [kog, openstack, neutron, api, crd, compositiondefinition]
-timestamp: 2026-11-17T00:00:00Z
+timestamp: 2026-11-18T00:00:00Z
 ---
 
 # API
@@ -62,7 +62,11 @@ Each enabled `restdefinitions.<resource>` block ([configuration.md](configuratio
 `RestDefinition` ([`chart/templates/rd-*.yaml`](../chart/templates)), from which `oasgen-provider`
 generates a CRD plus a companion `<Kind>Configuration` CRD.
 
-All Kinds share the API group **`network.openstack.krateo.io`**, version `v1alpha1`.
+All Kinds share the API group **`network.openstack.krateo.io`**. The Neutron Kinds are served at version
+**`v2-0`**: oasgen-provider derives it from each OAS document's `info.version` (`"2.0"`), lowercased with
+every run of non-alphanumerics turned into `-` and a `v` prefixed. The `<Kind>Configuration` CRDs are always
+`v1alpha1`. Until 0.1.2 these docs and the samples said `v1alpha1` for the Neutron Kinds, which the apiserver
+rejects with "no matches for kind".
 
 | Kind | Neutron API | Verbs | Envelope key |
 |------|-------------|-------|--------------|
@@ -138,7 +142,7 @@ and so is detaching it:
 These payloads are **not** envelope-wrapped, so the CR is flat:
 
 ```yaml
-apiVersion: network.openstack.krateo.io/v1alpha1
+apiVersion: network.openstack.krateo.io/v2-0
 kind: NeutronRouterInterface
 metadata:
   name: demo-router-demo-subnet

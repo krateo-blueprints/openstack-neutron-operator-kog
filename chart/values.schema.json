@@ -19,7 +19,7 @@
             },
             "resourceGroup": {
               "type": "string",
-              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v1alpha1).",
+              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v2-0, derived by oasgen-provider from the OAS info.version 2.0; the <Kind>Configuration is v1alpha1).",
               "default": "network.openstack.krateo.io"
             },
             "resourceKind": {
@@ -41,7 +41,7 @@
             },
             "resourceGroup": {
               "type": "string",
-              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v1alpha1).",
+              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v2-0, derived by oasgen-provider from the OAS info.version 2.0; the <Kind>Configuration is v1alpha1).",
               "default": "network.openstack.krateo.io"
             },
             "resourceKind": {
@@ -63,7 +63,7 @@
             },
             "resourceGroup": {
               "type": "string",
-              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v1alpha1).",
+              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v2-0, derived by oasgen-provider from the OAS info.version 2.0; the <Kind>Configuration is v1alpha1).",
               "default": "network.openstack.krateo.io"
             },
             "resourceKind": {
@@ -85,7 +85,7 @@
             },
             "resourceGroup": {
               "type": "string",
-              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v1alpha1).",
+              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v2-0, derived by oasgen-provider from the OAS info.version 2.0; the <Kind>Configuration is v1alpha1).",
               "default": "network.openstack.krateo.io"
             },
             "resourceKind": {
@@ -107,7 +107,7 @@
             },
             "resourceGroup": {
               "type": "string",
-              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v1alpha1).",
+              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v2-0, derived by oasgen-provider from the OAS info.version 2.0; the <Kind>Configuration is v1alpha1).",
               "default": "network.openstack.krateo.io"
             },
             "resourceKind": {
@@ -129,7 +129,7 @@
             },
             "resourceGroup": {
               "type": "string",
-              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v1alpha1).",
+              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v2-0, derived by oasgen-provider from the OAS info.version 2.0; the <Kind>Configuration is v1alpha1).",
               "default": "network.openstack.krateo.io"
             },
             "resourceKind": {
@@ -151,7 +151,7 @@
             },
             "resourceGroup": {
               "type": "string",
-              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v1alpha1).",
+              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v2-0, derived by oasgen-provider from the OAS info.version 2.0; the <Kind>Configuration is v1alpha1).",
               "default": "network.openstack.krateo.io"
             },
             "resourceKind": {
@@ -173,7 +173,7 @@
             },
             "resourceGroup": {
               "type": "string",
-              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v1alpha1).",
+              "description": "Kubernetes API group for the generated CRD (GVK = <resourceGroup>/v2-0, derived by oasgen-provider from the OAS info.version 2.0; the <Kind>Configuration is v1alpha1).",
               "default": "network.openstack.krateo.io"
             },
             "resourceKind": {

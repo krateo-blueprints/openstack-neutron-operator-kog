@@ -4,7 +4,7 @@ title: openstack-neutron-operator-kog — configuration
 description: The whole values surface of the chart — the per-resource RestDefinition toggles and the auth-bridge block (clouds Secret, endpoint discovery, image, resources) — plus the CompositionDefinition input mapping.
 resource: oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog
 tags: [kog, openstack, neutron, values, configuration, auth-bridge]
-timestamp: 2026-11-17T00:00:00Z
+timestamp: 2026-11-18T00:00:00Z
 ---
 
 # Configuration
@@ -22,7 +22,7 @@ eight resources:
 | Key | Type | Default | Meaning |
 |-----|------|---------|---------|
 | `enabled` | boolean | `true` | Generate the RestDefinition (and CRD) for this resource. Set `false` to skip it. |
-| `resourceGroup` | string | `network.openstack.krateo.io` | Kubernetes API group for the generated CRD (GVK = `<resourceGroup>/v1alpha1`). |
+| `resourceGroup` | string | `network.openstack.krateo.io` | Kubernetes API group for the generated CRD (GVK = `<resourceGroup>/v2-0`, the version oasgen-provider derives from the OAS `info.version` "2.0"; each `<Kind>Configuration` is `v1alpha1`). |
 | `resourceKind` | string | `Neutron<Resource>` | Generated CRD Kind. Prefixed `Neutron*` to avoid the crdgen Kind-vs-envelope-property collision. |
 
 The eight resource blocks and their default Kinds:

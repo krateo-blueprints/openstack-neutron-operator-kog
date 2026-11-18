@@ -4,7 +4,7 @@ title: openstack-neutron-operator-kog — quickstart
 description: End-to-end walkthrough of the OpenStack Neutron KOG — install the operator, apply a NeutronNetwork, NeutronSubnet and NeutronSecurityGroup, and watch them appear in the Horizon dashboard.
 resource: oci://ghcr.io/krateo-blueprints/charts/openstack-neutron-operator-kog
 tags: [kog, openstack, neutron, quickstart, runbook]
-timestamp: 2026-08-11T00:00:00Z
+timestamp: 2026-11-18T00:00:00Z
 ---
 
 # Quickstart — Neutron (network) operator
@@ -46,14 +46,14 @@ kind: NeutronNetworkConfiguration
 metadata: {name: neutron-config, namespace: krateo-system}
 spec: {authentication: {bearer: {tokenRef: {name: neutron-token, namespace: krateo-system, key: token}}}}
 ---
-apiVersion: network.openstack.krateo.io/v1alpha1
+apiVersion: network.openstack.krateo.io/v2-0
 kind: NeutronNetwork
 metadata: {name: kog-demo-net, namespace: krateo-system}
 spec:
   configurationRef: {name: neutron-config, namespace: krateo-system}
   network: {name: kog-demo-net, admin_state_up: true}
 ---
-apiVersion: network.openstack.krateo.io/v1alpha1
+apiVersion: network.openstack.krateo.io/v2-0
 kind: NeutronSecurityGroup
 metadata: {name: kog-demo-sg, namespace: krateo-system}
 spec:
@@ -67,7 +67,7 @@ Read the network's id from its status, then create a subnet referencing it:
 ```bash
 NETID=$(kubectl -n krateo-system get neutronnetwork kog-demo-net -o jsonpath='{.status.network.id}')
 cat <<EOF | kubectl apply -f -
-apiVersion: network.openstack.krateo.io/v1alpha1
+apiVersion: network.openstack.krateo.io/v2-0
 kind: NeutronSubnet
 metadata: {name: kog-demo-subnet, namespace: krateo-system}
 spec:

@@ -68,3 +68,9 @@ jobs:
 
       - name: Every status field resolves in its observe response
         run: python3 hack/validate-status-fields.py chart
+
+      # A findby whose identifiers are not keys of the list item can never match: absence is inferred
+      # every reconcile and create re-fires forever. Also refuses a findby item that declares no
+      # properties. Self-tests its detector first. (Origin: keystone-kog IdentityRoleAssignment, dp303.)
+      - name: findby identifiers are keys of the list item
+        run: python3 hack/validate-findby-identifiers.py chart
