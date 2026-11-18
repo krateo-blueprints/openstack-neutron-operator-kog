@@ -153,21 +153,26 @@ def main(chart):
             failures.append("%s: no get or findby verb, so no status field can ever be populated" % name)
             continue
 
-        mapped = {}
-        for action in ("get", "findby"):
-            for m in verbs.get(action, {}).get("fieldMapping", []) or []:
-                if m.get("inResponse") and m.get("inCustomResource"):
-                    dest = m["inCustomResource"]
-                    if dest.startswith("status."):
-                        dest = dest[len("status."):]
-                    mapped.setdefault(dest, m["inResponse"])
+        # The observe verb's response fieldMappings (inResponse -> inCustomResource). A destination
+        # resolves through its source. A source that is NOT also a destination is REMOVED from the
+        # body by the normalization (rest-dynamic-controller fieldmapping.NormalizeResponseBody), so a
+        # status field read from such a source stays empty.
+        mapped, sources = {}, set()
+        for m in observe.get("fieldMapping", []) or []:
+            if m.get("inResponse") and m.get("inCustomResource"):
+                dest = m["inCustomResource"]
+                if dest.startswith("status."):
+                    dest = dest[len("status."):]
+                mapped.setdefault(dest, m["inResponse"])
+                sources.add(m["inResponse"])
+        removed = {s for s in sources if s not in mapped}
 
         fields = list(res.get("identifiers", [])) + list(res.get("additionalStatusFields", []))
         checked = 0
         for field in dict.fromkeys(fields):
             checked += 1
             source = mapped.get(field, field)
-            ok = has_path(doc, schema, source)
+            ok = has_path(doc, schema, source) and (field in mapped or field not in removed)
             allowance = next((k for k in KNOWN_ABSENT if name.endswith(k[0]) and k[1] == field), None)
             if allowance:
                 seen_allowances.add(allowance)
@@ -177,6 +182,8 @@ def main(chart):
                 failures.append("%s: status.%s is in KNOWN_ABSENT but now resolves -- remove the entry" % (name, field))
             elif not ok:
                 via = "" if source == field else " (via fieldMapping from %s)" % source
+                if field in removed:
+                    via = " (a fieldMapping moves %s elsewhere, and the normalization removes the source)" % field
                 failures.append(
                     "%s: status.%s%s is not in the %s %s response schema, so it would stay empty forever"
                     % (name, field, via, observe["method"], observe["path"]))
