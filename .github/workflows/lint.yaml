@@ -93,3 +93,8 @@ jobs:
       # what that check refused, and 0.015.0.
       - name: The pinned shared release-preflight refuses every non-plain version
         run: python3 hack/validate-shared-preflight.py .
+
+      # validate-example-versions.py is right on its own: 0-1-2 is refused (the served version cannot tell it from
+      # 0.1.2), and a mutant without that refusal must accept it.
+      - name: The example-version check refuses a dashed version on its own
+        run: python3 hack/test-validate-example-versions.py
