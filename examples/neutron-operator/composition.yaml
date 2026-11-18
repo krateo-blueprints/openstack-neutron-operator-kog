@@ -9,7 +9,9 @@
 #   version = chart version 0.1.2 -> v0-1-2
 #             It changes with EVERY release: this must match the version of the
 #             CompositionDefinition you applied, or the apiserver has no such
-#             version to serve. Bump it when the chart is tagged.
+#             version to serve. Bump it before tagging: the release preflight
+#             refuses a release whose examples name another version
+#             (hack/release-preflight -> hack/validate-example-versions.py).
 #   Kind    = PascalCase of the CD metadata.name (hyphens removed)
 #             openstack-neutron-operator-kog -> OpenstackNeutronOperatorKog
 #
