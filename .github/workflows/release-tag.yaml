@@ -23,13 +23,12 @@ jobs:
   # (krateo-blueprints/charts PUBLISHING.md rule 12). It runs hack/release-preflight with the tag;
   # a non-zero exit fails this job, and package-and-push needs it, so a refusal publishes nothing.
   #
-  # Pinned to the krateo-blueprints/charts main commit that merged release-preflight (charts#18).
-  # It is not in a tagged publisher release yet (the last is 1.0.4); once 1.1.0 is cut, re-pin to
-  # its commit with a `# 1.1.0` comment. Dependabot then keeps it current (rule 9).
+  # Pinned by full commit SHA with its release in a comment (PUBLISHING.md rule 9); Dependabot
+  # proposes each newer release as a reviewed PR.
   preflight:
     permissions:
       contents: read
-    uses: krateo-blueprints/charts/.github/workflows/release-preflight.yaml@78735dbe31c4f3055370d54dd5e49b7416e8e7b9 # main@78735db
+    uses: krateo-blueprints/charts/.github/workflows/release-preflight.yaml@788f1a6c106707ada89792f499afdcf3bc0b5d13 # 1.1.0
     with:
       version: ${{ github.ref_name }}
 

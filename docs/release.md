@@ -66,11 +66,9 @@ release** unless every `composition.krateo.io` Composition under `examples/` nam
 `helm lint` / `helm template` and the `status-fields` gate run on pull requests
 ([`.github/workflows/lint.yaml`](../.github/workflows/lint.yaml)), not on the tag.
 
-The `preflight` job is pinned by full commit SHA, never a branch. Today that is the
-krateo-blueprints/charts `main` commit that merged the reusable workflow (`# main@78735db`), because
-no publisher release carries it yet. Once one does (1.1.0), re-pin to that release's commit with its
-`# x.y.z` comment. [`.github/dependabot.yml`](../.github/dependabot.yml) keeps the pin
-current after that (PUBLISHING.md rule 9).
+The `preflight` job pins krateo-blueprints/charts 1.1.0 by its full commit SHA, with `# 1.1.0`
+beside it, and never a branch. [`.github/dependabot.yml`](../.github/dependabot.yml) proposes each newer
+release as a reviewed PR (PUBLISHING.md rule 9).
 
 ## Documentation gate
 
