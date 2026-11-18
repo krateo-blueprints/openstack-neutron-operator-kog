@@ -23,21 +23,24 @@ must be exactly composition.krateo.io/v<version with dots as dashes>. Regex-driv
 YAML-parsed so it needs nothing beyond the standard library on the runner; apiVersion is only
 matched at the start of a line, so the derivation notes in comments are not read as manifests.
 
-Exit 1 on any mismatch, on a malformed version, or if no Composition is found at all (a gate
-with no input must not pass).
+Exit 1 on any mismatch, on an empty version, or if no Composition is found at all (a gate
+with no input must not pass). The version's shape is the shared release-preflight's to check.
 """
 import pathlib
 import re
 import sys
 
 GROUP = "composition.krateo.io"
-SEMVER = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 API_VERSION = re.compile(r"^apiVersion:\s*[\"']?" + re.escape(GROUP) + r"/([^\s\"'#]+)", re.M)
 
 
 def main(version, examples_dir):
-    if not SEMVER.match(version):
-        print("FAIL: %r is not a MAJOR.MINOR.PATCH version" % version)
+    # The version's shape is checked before this runs, by the shared release-preflight.yaml (charts 1.4.3 and later),
+    # with rule 13's exact pattern; the check that stood here (^[0-9]+\.[0-9]+\.[0-9]+$) accepted 0.015.0 and is
+    # retired. hack/validate-shared-preflight.py requires the pinned shared step to refuse what it refused. An empty
+    # version still names nothing, so it is refused here too.
+    if not version:
+        print("FAIL: empty version")
         return 1
     want = "v" + version.replace(".", "-")
     root = pathlib.Path(examples_dir)
