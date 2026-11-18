@@ -42,6 +42,13 @@ def main(version, examples_dir):
     if not version:
         print("FAIL: empty version")
         return 1
+    # BEGIN dash-refusal (hack/test-validate-example-versions.py deletes it to prove its case sees it)
+    # The served version replaces dots with dashes, so 0-1-2 and 0.1.2 would name the same example; refused here,
+    # so this check is right on its own and not only behind the shared step's rule-13 check.
+    if "-" in version:
+        print("FAIL: %r contains '-', which the served version (dots as dashes) cannot tell from a dot" % version)
+        return 1
+    # END dash-refusal
     want = "v" + version.replace(".", "-")
     root = pathlib.Path(examples_dir)
     if not root.is_dir():
