@@ -11,6 +11,14 @@ timestamp: 2026-11-18T00:00:00Z
 
 Curated history of notable changes and decisions. Newest first.
 
+## Unreleased — status-field gate models a mapping's source removal
+
+`hack/validate-status-fields.py` now knows that a response fieldMapping removes its source unless
+the source is itself a destination (rest-dynamic-controller `fieldmapping.NormalizeResponseBody`).
+So a status field read from a moved source is reported as staying empty. It also reads only the
+observe verb's mappings. This is the same model as glance-kog's copy, whose `main()` is now
+identical. The current definitions pass either way.
+
 ## Unreleased — findby gate: per-verb policy, both mapping lists, declared action-only kinds
 
 `hack/validate-findby-identifiers.py` gets the same update as keystone-kog's. It reads
