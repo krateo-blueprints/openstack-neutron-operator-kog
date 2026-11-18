@@ -11,6 +11,14 @@ timestamp: 2026-11-18T00:00:00Z
 
 Curated history of notable changes and decisions. Newest first.
 
+## Unreleased — create reachability rests on evidence, not on a declared 404
+
+Same `hack/validate-findby-identifiers.py` as keystone-kog's. rest-dynamic-controller decides absence
+from the wire status, so a 404 declared in the OAS is not evidence. Only `notFoundBody` and
+`notFoundCodes` pass automatically; anything else needs a `kog.openstack.krateo.io/get-absent-evidence`
+citation. A get that tolerates 404 is warned about. `hack/README.md` names each declaration's
+consuming file:line. Neutron has no create-reach candidate, and the summary line says so.
+
 ## Unreleased — findby gate: reachability, its oasgen floor, the inert findby+create shape
 
 `hack/validate-findby-identifiers.py` is the same script as keystone-kog's. It refuses a findby that a
