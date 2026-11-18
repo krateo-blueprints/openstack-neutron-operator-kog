@@ -11,6 +11,14 @@ timestamp: 2026-11-18T00:00:00Z
 
 Curated history of notable changes and decisions. Newest first.
 
+## Unreleased — findby gate: per-verb policy, both mapping lists, declared action-only kinds
+
+`hack/validate-findby-identifiers.py` gets the same update as keystone-kog's. It reads
+`identifiersMatchPolicy` from the findby verb (OR by default) and requires identifiers to exist in the
+generated CR spec as well, reading request mappings from both lists. A never-matching findby passes
+only with a declared `kog.openstack.krateo.io/findby-action-only` reason. `NeutronRouterInterface`
+still passes: `router_id` comes from `device_id` and is a path parameter.
+
 ## Unreleased — the Neutron Kinds are `v2-0`, not `v1alpha1`; findby gate
 
 - oasgen-provider serves each Neutron Kind at the version it derives from the OAS `info.version`. That
