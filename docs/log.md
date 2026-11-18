@@ -11,6 +11,14 @@ timestamp: 2026-11-18T00:00:00Z
 
 Curated history of notable changes and decisions. Newest first.
 
+## Unreleased — findby gate: reachability, its oasgen floor, the inert findby+create shape
+
+`hack/validate-findby-identifiers.py` is the same script as keystone-kog's. It refuses a findby that a
+spec-buildable get makes unreachable, and reports create reachability. It states the oasgen-provider
+floor its verdicts assume (0.52.0, #421) and reads the repository's minimum from the README, now
+stated as `oasgen-provider >= 0.52.0`. A findby + get + create kind whose get declares no absence gets
+its own "inert" verdict. `NeutronRouterInterface` has no get, so its findby stays reachable.
+
 ## Unreleased — status-field gate models a mapping's source removal
 
 `hack/validate-status-fields.py` now knows that a response fieldMapping removes its source unless

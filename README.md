@@ -38,6 +38,11 @@ that authenticates with a `clouds.yaml`, discovers the `network` endpoint, and i
 
 ## Install
 
+Requires **oasgen-provider >= 0.52.0**: `NeutronRouterInterface` uses `itemsPath`, a findby
+`responseTransform`, response `fieldMapping` and `identifiersMatchPolicy` ([docs/api.md](docs/api.md)).
+CI reads this minimum (`hack/validate-findby-identifiers.py`), so keep it the one place the version
+is stated.
+
 Prerequisite — the Krateo KOG provider in the cluster:
 
 ```bash
